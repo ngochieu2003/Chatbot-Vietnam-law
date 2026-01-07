@@ -8,6 +8,7 @@ Dự án này xây dựng một hệ thống chatbot có khả năng trả lời
 - Tìm kiếm thông tin liên quan từ database các văn bản pháp luật đã được xử lý
 - Sử dụng LLM (Google Gemini) để tạo câu trả lời dựa trên thông tin tìm được
 - Cung cấp nguồn tham khảo (điều luật, chương, văn bản) cho mỗi câu trả lời
+- Link Dataset: https://phapdien.moj.gov.vn/TraCuuPhapDien/MainBoPD.aspx
 
 ## 🏗️ Kiến Trúc
 
