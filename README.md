@@ -135,5 +135,5 @@ MIT License
 
 ## 👤 Tác Giả
 
-Ngô Chiếu - [GitHub](https://github.com/ngochieu2003)
+Ngọc Hiếu - [GitHub](https://github.com/ngochieu2003)
 
