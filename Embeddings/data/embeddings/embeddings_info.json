@@ -1,0 +1,18 @@
+{
+  "model_name": "multilingual-minilm",
+  "model_info": {
+    "model_name": "multilingual-minilm",
+    "model_path": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "dimension": 384,
+    "device": "cpu",
+    "max_seq_length": 128
+  },
+  "total_chunks": 241451,
+  "batch_size": 32,
+  "saved_at": "2025-11-23T18:21:25.847870",
+  "shape": [
+    241451,
+    384
+  ],
+  "dtype": "float32"
+}

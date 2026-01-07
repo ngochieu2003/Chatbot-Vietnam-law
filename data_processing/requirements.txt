@@ -1,0 +1,13 @@
+# Requirements cho xử lý dữ liệu pháp điển
+# Cài đặt: pip install -r requirements.txt
+
+# Xử lý HTML
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Xử lý dữ liệu
+python-dateutil>=2.8.0
+
+# Utilities
+tqdm>=4.65.0  # Progress bar (optional, nhưng hữu ích)
+

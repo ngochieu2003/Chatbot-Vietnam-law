@@ -1,0 +1,73 @@
+chatbot_rag/
+├─ App/
+│  ├─ requirements.txt
+│  ├─ test_api.py
+│  ├─ api/
+│  │  ├─ __init__.py
+│  │  ├─ fastapi_app.py
+│  │  └─ __pycache__/
+│  └─ frontend/
+│     ├─ __init__.py
+│     └─ streamlit_app.py
+├─ data_processing/
+│  ├─ data_cleaner.py
+│  ├─ data_chunker.py
+│  ├─ metadata_extractor.py
+│  ├─ analyze_data_quality.py
+│  ├─ requirements.txt
+│  ├─ chunks.json
+│  ├─ metadata.json
+│  ├─ data_quality_report.json
+│  └─ cleaned_data/
+│     ├─ 012d9b93-c11d-48b6-b08e-14d77515ca1e_cleaned.txt
+│     ├─ 024d0bdb-4439-40e4-90ae-f3525f58351b_cleaned.txt
+│     ├─ 04e3798c-9ab3-4896-a06a-dbc630f8d59c_cleaned.txt
+│     └─ ... (many other _cleaned.txt files)
+├─ Dataset/
+│  ├─ BoPhapDien.html
+│  ├─ data_quality_report.json
+│  ├─ jsonData.js
+│  ├─ demuc/
+│  └─ lib/
+├─ Embeddings/
+│  ├─ requirements.txt
+│  ├─ data/
+│  ├─ models/
+│  ├─ scripts/
+│  └─ utils/
+├─ RAG/
+│  ├─ requirements.txt
+│  ├─ test_search_only.py
+│  ├─ models/
+│  │  └─ rag_system.py (core orchestration)
+│  └─ utils/
+│     └─ llm_utils.py (LLM adapters + prompt formatting)
+├─ VectorDB/
+│  ├─ README.md
+│  ├─ requirements.txt
+│  ├─ data/
+│  │  └─ index/
+│  │     ├─ faiss_index.bin
+│  │     └─ faiss_index_info.json
+│  ├─ models/
+│  ├─ scripts/
+│  └─ utils/
+├─ Note/
+│  ├─ ARCHITECTURE_STRUCTURE.txt
+│  ├─ DATA_PREPARATION_PREPROCESSING.txt
+│  ├─ FAISS_INDEX_CONFIGURATION.txt
+│  ├─ PROMPT_ENGINEERING_GUIDE.txt
+│  ├─ PROJECT_SUMMARY.txt
+│  ├─ PROJECT_RESULTS.txt
+│  ├─ README_DataProcess.md
+│  ├─ NEXT_STEPS.md
+│  └─ FILE_DESCRIPTIONS.md
+└─ (other root files)
+   ├─ PROJECT_TREE.txt  <-- this file
+   └─ (git/hidden files not listed)
+
+Notes:
+- Folders renamed: "Data process" → "data_processing", "Chatbot-RAG" → "chatbot_rag"
+- Documentation files are centralized in `Note/` to keep runtime folders lean.
+- `App/frontend/streamlit_app.py` stores chat history in `st.session_state.messages` (in-memory). To persist history, backend + DB integration is recommended.
+- The tree focuses on the repository layout; some folders like `RAG/models/`, `VectorDB/models/`, and `Embeddings/data/` contain additional code and model artifacts not fully expanded here.

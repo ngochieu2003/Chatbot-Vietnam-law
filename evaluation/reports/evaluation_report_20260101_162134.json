@@ -1,0 +1,454 @@
+{
+  "total_tests": 5,
+  "successful_tests": 5,
+  "failed_tests": 0,
+  "success_rate": 1.0,
+  "average_score": 0.6823333333333335,
+  "average_query_time": 17.743272161483766,
+  "total_time": 88.71636080741882,
+  "category_scores": {
+    "general": 0.665,
+    "procedural": 0.5716666666666667,
+    "business": 0.655,
+    "traffic": 0.865,
+    "labor": 0.655
+  },
+  "results": [
+    {
+      "question": "Phạm vi điều chỉnh của luật là gì?",
+      "answer": "Dựa trên các điều luật được cung cấp, phạm vi điều chỉnh của luật được quy định như sau:\n\n1.  **Theo Điều 39.13.LQ.1 (Luật) [2]:**\n    *   Phạm vi điều chỉnh là việc thi hành các hình thức xử phạt vi phạm hành chính, các biện pháp khắc phục hậu quả quy định tại Nghị định này được thực hiện theo quy định của Luật Xử lý vi phạm hành chính và các văn bản hướng dẫn thi hành.\n\n2.  **Theo Điều 39.13.LQ.1 (Luật) [4]:**\n    *   Phạm vi điều chỉnh của Chương này quy định các trường hợp bị cưỡng chế, các biện pháp cưỡng chế thi hành quyết định hành chính thuế, nguyên tắc, thẩm quyền, trình tự, thủ tục thực hiện các biện pháp cưỡng chế thi hành quyết định hành chính thuế đối với tổ chức, cá nhân bị cưỡng chế (trừ biện pháp dừng làm thủ tục hải quan đối với hàng hóa xuất khẩu, nhập khẩu).\n    *   Việc cưỡng chế quy định tại Điều này áp dụng cho các quyết định hành chính thuế bao gồm: Quyết định xử phạt vi phạm hành chính về thuế; quyết định áp dụng biện pháp khắc phục hậu quả theo quy định của pháp luật về xử lý vi phạm hành chính; quyết định về bồi thường thiệt hại; quyết định hành chính thuế khác theo quy định của pháp luật và các thông báo ấn định thuế, thông báo tiền thuế nợ, thông báo tiền chậm nộp tiền thuế.",
+      "sources": [
+        {
+          "dieu": "Điều 44.12.NĐ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Nghị định",
+          "so_van_ban": "20/2008/N",
+          "ngay_ban_hanh": "2008-02-14",
+          "content_preview": "Trên cơ sở nghiên cứu và làm rõ thông tin liên quan, Vụ Pháp chế có trách nhiệm:\n1. Đối với phản ánh, kiến nghị về hành vi chậm trễ, gây phiền hà hoặc không thực hiện, thực hiện không đúng quy định hà..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "1. Việc thi hành các hình thức xử phạt vi phạm hành chính, các biện pháp khắc phục hậu quả quy định tại Nghị định này được thực hiện theo quy định của Luật Xử lý vi phạm hành chính và các văn bản hướn..."
+        },
+        {
+          "dieu": "Điều 44.7.PL.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Pháp lệnh",
+          "so_van_ban": "03/2012/UBTVQH13",
+          "ngay_ban_hanh": "2012-04-16",
+          "content_preview": "a) Trong trường hợp có quy phạm pháp luật mới được ban hành, sửa đổi, bổ sung, thay thế hoặc có quy phạm pháp luật bị bãi bỏ thuộc đề mục đã có trong chủ đề thì cơ quan thực hiện pháp điển xác định qu..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "1. Phạm vi điều chỉnh\nChương này quy định các trường hợp bị cưỡng chế, các biện pháp cưỡng chế thi hành quyết định hành chính thuế, nguyên tắc, thẩm quyền, trình tự, thủ tục thực hiện các biện pháp cư..."
+        },
+        {
+          "dieu": "Điều 44.7.PL.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Pháp lệnh",
+          "so_van_ban": "03/2012/UBTVQH13",
+          "ngay_ban_hanh": "2012-04-16",
+          "content_preview": "1. Việc cập nhật quy phạm pháp luật mới vào Bộ pháp điển được thực hiện như sau:\na) Trong trường hợp có quy phạm pháp luật mới được ban hành, sửa đổi, bổ sung, thay thế hoặc có quy phạm pháp luật bị b..."
+        }
+      ],
+      "query_time": 10.007463932037354,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "phạm vi",
+            "điều chỉnh",
+            "luật"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 0.0,
+          "matched_sources": [],
+          "unmatched_sources": [
+            "Điều 1",
+            "Điều 2"
+          ],
+          "match_ratio": 0.0,
+          "retrieved_count": 5
+        },
+        "answer_quality": {
+          "score": 1.0,
+          "has_error": false,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 5
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 7.609667015075684,
+          "min_distance": 7.4598822593688965,
+          "max_distance": 7.680018424987793,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.665
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_001",
+      "category": "general",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Quy định về thời hiệu khởi kiện là bao nhiêu năm?",
+      "answer": "Tôi không tìm thấy thông tin về thời hiệu khởi kiện trong các điều luật được cung cấp. Các điều luật được cung cấp quy định về:\n*   Thời hạn nộp hồ sơ yêu cầu rà soát biện pháp chống bán phá giá, chống trợ cấp ([1] Điều 34.3.LQ.1, [2] Điều 34.3.LQ.1).\n*   Thời hiệu xử lý kỷ luật ([3] Điều 25.5.LQ.1).\n*   Thời gian thực hiện kê biên tài sản ([4] Điều 30.3.LQ.1).\n*   Thời hạn sử dụng thẻ bảo hiểm y tế ([5] Điều 2.2.LQ.1).",
+      "sources": [
+        {
+          "dieu": "Điều 34.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "05/2017/QH14",
+          "ngay_ban_hanh": "2017-06-12",
+          "content_preview": "2. Chậm nhất 60 ngày trước khi kết thúc tròn năm kể từ ngày quyết định áp dụng biện pháp chống bán phá giá, chống trợ cấp chính thức có hiệu lực hoặc quyết định gia hạn biện pháp chống bán phá giá, ch..."
+        },
+        {
+          "dieu": "Điều 34.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "05/2017/QH14",
+          "ngay_ban_hanh": "2017-06-12",
+          "content_preview": "Nội dung:\n1. Định kỳ hàng năm trong bốn năm đầu tiên kể từ ngày quyết định áp dụng biện pháp chống bán phá giá, chống trợ cấp chính thức có hiệu lực hoặc quyết định gia hạn biện pháp chống bán phá giá..."
+        },
+        {
+          "dieu": "Điều 25.5.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "48/2019/QH14",
+          "ngay_ban_hanh": "2019-11-22",
+          "content_preview": "Ghi chú: (Điều 33 Thông tư số 75/2020/TT-BQP, có hiệu lực thi hành kể từ ngày 05/08/2020)\nNội dung:\n1. Thời hiệu xử lý kỷ luật là khoảng thời gian từ thời điểm vi phạm kỷ luật đến khi bị phát hiện vi ..."
+        },
+        {
+          "dieu": "Điều 30.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "41/2019/QH14",
+          "ngay_ban_hanh": "2019-06-14",
+          "content_preview": "Ghi chú: (Điều 29 Nghị định số 44/2020/NĐ-CP, có hiệu lực thi hành kể từ ngày 01/06/2020)\nNội dung:\n1. Việc kê biên tài sản phải thực hiện vào ban ngày, thời gian từ 08 giờ đến 17 giờ, trừ các ngày ng..."
+        },
+        {
+          "dieu": "Điều 2.2.LQ.1. Phạm vi điều chỉnh và đối tượng áp dụng",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "25/2008/QH12",
+          "ngay_ban_hanh": "2008-11-14",
+          "content_preview": "Nội dung:\n1. Từ ngày 01 tháng 01 năm 2016, thời hạn sử dụng thẻ BHYT của đối tượng quy định tại Điều 1 Thông tư này như sau:\na) Đối với đối tượng quy định tại các Khoản 1 và 2 tối đa 12 tháng tính từ ..."
+        }
+      ],
+      "query_time": 4.5771870613098145,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 0.6666666666666666,
+          "found_keywords": [
+            "thời hiệu",
+            "khởi kiện"
+          ],
+          "missing_keywords": [
+            "năm"
+          ],
+          "coverage_ratio": 0.6666666666666666
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 0.3,
+          "has_error": true,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 5
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 7.711536502838134,
+          "min_distance": 7.317502498626709,
+          "max_distance": 8.156473159790039,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.5716666666666667
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_002",
+      "category": "procedural",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Điều kiện để được cấp giấy phép kinh doanh là gì?",
+      "answer": "Dựa trên các điều luật được cung cấp, điều kiện để được cấp giấy phép kinh doanh được quy định cụ thể cho **giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm** như sau:\n\nĐể được cấp giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm, cơ sở cần đáp ứng các điều kiện sau:\n*   Có một trong các loại giấy chứng nhận đăng ký kinh doanh, giấy chứng nhận đăng ký doanh nghiệp, giấy chứng nhận đầu tư theo quy định của pháp luật. (Điều 32.3.LQ.1, khoản 3a)\n*   Người đứng đầu cơ sở nhập khẩu xuất bản phẩm phải thường trú tại Việt Nam, có văn bằng do cơ sở đào tạo chuyên ngành cấp hoặc giấy chứng nhận bồi dưỡng kiến thức nghiệp vụ phát hành xuất bản phẩm do Bộ Thông tin và Truyền thông cấp. (Điều 32.3.LQ.1, khoản 3b)\n*   Có đội ngũ nhân viên đủ năng lực thẩm định nội dung sách trong trường hợp kinh doanh nhập khẩu sách. (Điều 32.3.LQ.1, khoản 3c)\n\nTôi không tìm thấy thông tin về điều kiện cấp giấy phép kinh doanh chung hoặc các loại giấy phép kinh doanh khác trong các điều luật được cung cấp, ngoài các điều kiện cụ thể cho giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm.",
+      "sources": [
+        {
+          "dieu": "Điều 45.11.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "44/2019/QH14",
+          "ngay_ban_hanh": "2019-06-14",
+          "content_preview": "2. Thủ tục cấp giấy phép:\na) Thương nhân nộp hồ sơ trực tiếp hoặc qua đường bưu điện hoặc trực tuyến (nếu đủ điều kiện áp dụng) đến cơ quan có thẩm quyền cấp giấy phép;\nb) Đối với cấp Giấy phép sản xu..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "Khi áp dụng biện pháp cưỡng chế thu hồi giấy chứng nhận đăng ký kinh doanh hoặc giấy phép thành lập và hoạt động, giấy phép hành nghề, cơ quan Hải quan phải gửi văn bản yêu cầu cơ quan quản lý nhà nướ..."
+        },
+        {
+          "dieu": "Điều 32.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "19/2012/QH13",
+          "ngay_ban_hanh": "2012-11-20",
+          "content_preview": "3. Điều kiện cấp giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm bao gồm:\na) Có một trong các loại giấy chứng nhận đăng ký kinh doanh, giấy chứng nhận đăng ký doanh nghiệp, giấy chứng nhận đầu ..."
+        },
+        {
+          "dieu": "Điều 3.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "67/2006/QH11",
+          "ngay_ban_hanh": "2006-06-29",
+          "content_preview": "8. Gia hạn giấy phép\na) Trước khi giấy phép hết hiệu lực nhưng doanh nghiệp chưa thể hoàn thành thủ tục cấp lại thì phải thực hiện thủ tục gia hạn nếu doanh nghiệp vẫn có nhu cầu tiếp tục hoạt động. M..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "(Điều 64 Nghị định số 127/2013/NĐ-CP, có hiệu lực thi hành kể từ ngày 15/12/2013)\nKhi áp dụng biện pháp cưỡng chế thu hồi giấy chứng nhận đăng ký kinh doanh hoặc giấy phép thành lập và hoạt động, giấy..."
+        }
+      ],
+      "query_time": 5.94756293296814,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "điều kiện",
+            "giấy phép",
+            "kinh doanh"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 0.3,
+          "has_error": true,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 4
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 8.375989055633545,
+          "min_distance": 7.927609920501709,
+          "max_distance": 8.594100952148438,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.655
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_003",
+      "category": "business",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Mức phạt vi phạm giao thông là bao nhiêu?",
+      "answer": "Dựa trên các điều luật được cung cấp, mức phạt vi phạm giao thông khác nhau tùy thuộc vào hành vi vi phạm cụ thể:\n\n1.  **Đối với hành vi tự ý thay đổi nhãn hiệu, màu sơn của xe không đúng với Giấy đăng ký xe:**\n    *   **Xe mô tô, xe gắn máy và các loại xe tương tự xe mô tô:**\n        *   Cá nhân: Phạt tiền từ 100.000 đồng đến 200.000 đồng.\n        *   Tổ chức: Phạt tiền từ 200.000 đồng đến 400.000 đồng.\n        (Theo Điều 39.13.NĐ.75.30 khoản 1)\n    *   **Xe ô tô, máy kéo, xe máy chuyên dùng và các loại xe tương tự xe ô tô:**\n        *   Cá nhân: Phạt tiền từ 300.000 đồng đến 400.000 đồng.\n        *   Tổ chức: Phạt tiền từ 600.000 đồng đến 800.000 đồng.\n        (Theo Điều 39.13.NĐ.75.30 khoản 2)\n\n2.  **Đối với người điều khiển xe ô tô và các loại xe tương tự xe ô tô thực hiện một trong các hành vi vi phạm sau:**\n    *   Không chấp hành hiệu lệnh, chỉ dẫn của biển báo hiệu, vạch kẻ đường.\n    *   Chuyển hướng không nhường quyền đi trước.\n    *   Mức phạt: Phạt tiền từ 200.000 đồng đến 400.000 đồng.\n    (Theo Điều 39.13.NĐ.75.5 khoản 1 điểm a và điểm b)",
+      "sources": [
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "(Điều này có nội dung liên quan đến\nĐiều 39.13.NĐ.75.74. Phân định thẩm quyền xử phạt hành chính trong lĩnh vực giao thông đường bộ, đường sắt\n)\nĐiều 39.13.NĐ.75.30. Xử phạt chủ phương tiện vi phạm qu..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": ")\nĐiều 39.13.NĐ.75.5. Xử phạt người điều khiển xe ô tô và các loại xe tương tự xe ô tô vi phạm quy tắc giao thông đường bộ\n(Điều 5 Nghị định số 100/2019/NĐ-CP, có hiệu lực thi hành kể từ ngày 01/01/20..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "Điều 39.13.NĐ.75.74. Phân định thẩm quyền xử phạt hành chính trong lĩnh vực giao thông đường bộ, đường sắt\n)\nĐiều 39.13.NĐ.75.19. Xử phạt người điều khiển máy kéo (kể cả rơ moóc được kéo theo), xe máy..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "(Điều này có nội dung liên quan đến\nĐiều 39.13.NĐ.75.74. Phân định thẩm quyền xử phạt hành chính trong lĩnh vực giao thông đường bộ, đường sắt\n)\nĐiều 39.13.NĐ.75.28. Xử phạt các hành vi vi phạm quy đị..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "6. Phạt tiền từ 60.000.000 đồng đến 75.000.000 đồng đối mỗi hành vi vi phạm sau đây:\na) Tổ chức đua trái phép phương tiện trên đường thủy nội địa;\nb) Điều khiển phương tiện không tuân theo chỉ dẫn của..."
+        }
+      ],
+      "query_time": 47.304011821746826,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "phạt",
+            "vi phạm",
+            "giao thông"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 1.0,
+          "has_error": false,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 10
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 10.083056831359864,
+          "min_distance": 9.274070739746094,
+          "max_distance": 10.379766464233398,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.865
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_004",
+      "category": "traffic",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Quy định về quyền và nghĩa vụ của người lao động",
+      "answer": "Dựa trên các điều luật được cung cấp:\n\n**Quyền của người lao động:**\n\nNgười lao động làm việc theo hợp đồng lao động có các quyền sau đây:\n*   Được bảo đảm các điều kiện làm việc công bằng, an toàn, vệ sinh lao động; yêu cầu người sử dụng lao động có trách nhiệm bảo đảm điều kiện làm việc an toàn, vệ sinh lao động trong quá trình lao động, tại nơi làm việc. (Điều 20.5.LQ.1)\n*   Được cung cấp thông tin đầy đủ về các yếu tố nguy hiểm, yếu tố có hại tại nơi làm việc và những biện pháp phòng, chống; được đào tạo, huấn luyện về an toàn, vệ sinh lao động. (Điều 20.5.LQ.1)\n*   Được thực hiện chế độ bảo hộ lao động, chăm sóc sức khỏe, khám phát hiện bệnh nghề nghiệp. (Điều 20.5.LQ.1)\n\nTôi không tìm thấy thông tin về nghĩa vụ của người lao động trong các điều luật được cung cấp.",
+      "sources": [
+        {
+          "dieu": "Điều 20.5.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "84/2015/QH13",
+          "ngay_ban_hanh": "2015-06-25",
+          "content_preview": "Nội dung:\n1. Người lao động làm việc theo hợp đồng lao động có quyền sau đây:\na) Được bảo đảm các điều kiện làm việc công bằng, an toàn, vệ sinh lao động; yêu cầu người sử dụng lao động có trách nhiệm..."
+        },
+        {
+          "dieu": "Điều 20.2.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "45/2019/QH14",
+          "ngay_ban_hanh": "2019-11-20",
+          "content_preview": "i) Người có thẩm quyền xử lý kỷ luật lao động: người có thẩm quyền giao kết hợp đồng lao động bên phía người sử dụng lao động quy định tại khoản 3 Điều 18 của Bộ luật Lao động hoặc người được quy định..."
+        },
+        {
+          "dieu": "Điều 12.1.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "59/2020/QH14",
+          "ngay_ban_hanh": "2020-06-17",
+          "content_preview": "Chương: NHÓM CÔNG TY\nĐiều: Điều 12.1.NĐ.5.46. Quyền của người lao động\nGhi chú: (Điều 46 Nghị định số 148/2017/NĐ-CP, có hiệu lực thi hành kể từ ngày 25/12/2017)\nNội dung:\nNgười lao động có quyền tham..."
+        },
+        {
+          "dieu": "Điều 20.2.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "45/2019/QH14",
+          "ngay_ban_hanh": "2019-11-20",
+          "content_preview": "Nội quy lao động tại Điều 118 của Bộ luật Lao động được quy định như sau:\n1. Người sử dụng lao động phải ban hành nội quy lao động, nếu sử dụng từ 10 người lao động trở lên thì nội quy lao động phải b..."
+        },
+        {
+          "dieu": "Điều 20.5.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "84/2015/QH13",
+          "ngay_ban_hanh": "2015-06-25",
+          "content_preview": "3. Người lao động làm việc không theo hợp đồng lao động có quyền sau đây:\na) Được làm việc trong điều kiện an toàn, vệ sinh lao động; được Nhà nước, xã hội và gia đình tạo điều kiện để làm việc trong ..."
+        }
+      ],
+      "query_time": 20.88013505935669,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "quyền",
+            "nghĩa vụ",
+            "người lao động"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 0.3,
+          "has_error": true,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 4
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 7.171565341949463,
+          "min_distance": 6.860491752624512,
+          "max_distance": 7.33534049987793,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.655
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_005",
+      "category": "labor",
+      "difficulty": "hard"
+    }
+  ],
+  "timestamp": "2026-01-01T16:23:22.270223"
+}

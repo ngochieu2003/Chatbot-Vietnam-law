@@ -1,0 +1,28 @@
+[
+    {
+        "id": "test_001",
+        "question": "Phạm vi điều chỉnh của luật là gì?",
+        "expected_answer_keywords": ["phạm vi", "điều chỉnh", "luật"],
+        "expected_sources": ["Điều 1", "Điều 2"],
+        "category": "general",
+        "difficulty": "easy"
+    },
+    {
+        "id": "test_002",
+        "question": "Quy định về thời hiệu khởi kiện là bao nhiêu năm?",
+        "expected_answer_keywords": ["thời hiệu", "khởi kiện", "năm"],
+        "expected_sources": [],
+        "category": "procedural",
+        "difficulty": "medium"
+    },
+    {
+        "id": "test_003",
+        "question": "Điều kiện để được cấp giấy phép kinh doanh là gì?",
+        "expected_answer_keywords": ["điều kiện", "giấy phép", "kinh doanh"],
+        "expected_sources": [],
+        "category": "business",
+        "difficulty": "medium"
+    }
+    
+]
+

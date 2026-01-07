@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Large data files (>100MB)
+# Embeddings
+Embeddings/data/embeddings/embeddings.npy
+Embeddings/data/embeddings/*.npy
+
+# VectorDB
+VectorDB/data/index/faiss_index.bin
+VectorDB/data/index/*.bin
+
+# Data processing
+data_processing/chunks.json
+data_processing/cleaned_data/
+data_processing/*.json
+
+# Dataset (large HTML files)
+Dataset/
+Dataset/**/*.html
+Dataset/**/*.js
+
+# Logs
+*.log
+logs/
+RAG/utils/logs/
+
+# Reports (optional - có thể giữ lại nếu muốn)
+# evaluation/reports/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+

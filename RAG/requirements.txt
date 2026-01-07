@@ -1,0 +1,34 @@
+# Requirements cho RAG System
+#
+# LƯU Ý: FAISS nên được cài qua conda thay vì pip:
+#   conda install -c conda-forge faiss-cpu
+#   hoặc
+#   conda install -c pytorch faiss-cpu
+
+# Vector Database
+# faiss-cpu>=1.7.4  # Comment lại, cài qua conda thay vì pip
+
+# Embeddings
+sentence-transformers>=2.2.0
+numpy>=1.24.0,<2.0.0
+
+# LLM Integration
+openai>=1.0.0  # Cho OpenAI GPT
+anthropic>=0.3.0  # Cho Claude (optional)
+google-generativeai>=0.7.0  # Cho Google Gemini
+requests>=2.31.0  # Cho API calls
+protobuf>=3.20,<4.0  # Tương thích với streamlit 1.12.0
+
+# API Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# Frontend
+# streamlit>=1.0.0  # Comment lại nếu đã cài sẵn hoặc gặp lỗi pyarrow
+# Nếu chưa có streamlit, cài qua conda: conda install -c conda-forge streamlit
+
+# Utilities
+python-dotenv>=1.0.0  # Để quản lý API keys
+tqdm>=4.65.0
+

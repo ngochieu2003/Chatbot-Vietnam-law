@@ -1,0 +1,370 @@
+═══════════════════════════════════════════════════════════════════════════════
+CẤUTRÚC DỰ ÁN CHATBOT-RAG (CHATBOT PHÁP LUẬT VIỆT NAM)
+═══════════════════════════════════════════════════════════════════════════════
+
+1) TỔNG QUAN CẤU TRÚC
+Dự án Chatbot-RAG tuân theo kiến trúc RAG (Retrieval-Augmented Generation), 
+bao gồm 7 folder chính:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LUỒNG DỮ LIỆU: Dataset → data_processing → Embeddings → VectorDB → RAG → App  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+2) CHI TIẾT CẤU TRÚC TỪng FOLDER LỚN
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 Dataset/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / Dataset/
+Chức năng: Lưu trữ dữ liệu pháp luật gốc (raw data)
+Nội dung: 
+  - Tệp HTML/PDF/TXT chứa các văn bản pháp luật Việt Nam (Luật, Nghị định, etc.)
+  - Dữ liệu đã crawl hoặc download từ nguồn chính thức
+  - Cấu trúc file: có thể là HTML từ website, hoặc plain text
+
+Nhiệm vụ trong quy trình:
+  1. Là "kho dữ liệu gốc" để bắt đầu pipeline xử lý
+  2. Giữ bản gốc để audit, kiểm chứng nguồn
+  3. Dữ liệu từ đây được chuyển vào bước "data_processing" để làm sạch
+
+Lưu ý:
+  - File trong folder này có thể lớn (hàng chục MB trở lên)
+  - Cần đồng bộ với nguồn chính thức để đảm bảo độ chính xác pháp lý
+
+
+📁 data_processing/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / data_processing/
+Chức năng: Tiền xử lý dữ liệu (data cleaning, chunking, metadata extraction)
+
+Nội dung chính:
+  
+  ├─ Scripts xử lý:
+  │  ├─ data_cleaner.py: Làm sạch văn bản gốc (loại bỏ HTML tags, chuẩn hóa encoding)
+  │  ├─ text_normalizer.py: Chuẩn hoá ngôn ngữ (dấu câu, viết tắt, định dạng ngày)
+  │  ├─ data_chunker.py: Chia văn bản thành các chunk (200-800 ký tự) để phù hợp với embedding
+  │  ├─ metadata_extractor.py: Trích xuất metadata (số văn bản, ngày ban hành, điều, chương)
+  │  └─ analyze_data_quality.py: Kiểm tra chất lượng dữ liệu sau xử lý
+  │
+  ├─ Dữ liệu sau xử lý:
+  │  ├─ cleaned_data/: Folder chứa các file văn bản đã làm sạch (plain text, UTF-8)
+  │  ├─ chunks.json: Danh sách tất cả chunks (mỗi entry: id, content, metadata)
+  │  ├─ metadata.json: Metadata tổng hợp từ tất cả chunks
+  │  └─ data_quality_report.json: Báo cáo chất lượng (số chunks, định dạng, lỗi nếu có)
+  │
+  ├─ Tài liệu hướng dẫn:
+  │  ├─ README.md: Giải thích cách chạy script
+  │  ├─ FILE_DESCRIPTIONS.md: Mô tả chi tiết từng file output
+  │  └─ NEXT_STEPS.md: Các bước tiếp theo (embedding, build index)
+  │
+  └─ requirements.txt: Thư viện Python cần thiết (re, json, BeautifulSoup, etc.)
+
+Nhiệm vụ trong quy trình:
+  1. Nhập dữ liệu gốc từ Dataset/
+  2. Làm sạch, chuẩn hoá, trích metadata
+  3. Chia nhỏ thành chunks để phù hợp với embedding model
+  4. Xuất chunks.json và metadata.json cho bước tiếp theo
+
+Output chính: chunks.json (gốc để RAG truy vấn)
+
+Lưu ý:
+  - Chunk size và overlap là tham số quan trọng ảnh hưởng đến chất lượng retrieval
+  - Metadata phải chính xác để có thể trích dẫn nguồn
+
+
+📁 Embeddings/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / Embeddings/
+Chức năng: Tạo embedding vectors cho các chunks
+
+Nội dung:
+  
+  ├─ Scripts:
+  │  └─ scripts/: Chứa script để compute embeddings từ chunks.json
+  │              (sử dụng model sentence-transformer hoặc tương tự)
+  │
+  ├─ Models:
+  │  └─ models/: Lưu trữ embedding model (ví dụ paraphrase-multilingual-MiniLM-L12-v2)
+  │             Nếu dùng cloud API (OpenAI, Gemini) không cần lưu model locally
+  │
+  ├─ Data:
+  │  ├─ data/: Output embeddings
+  │  │   ├─ embeddings.npy: Ma trận embeddings (shape: [num_chunks, embedding_dim])
+  │  │   └─ mappings/chunk_mapping.json: Mapping chunk_id ↔ index trong embeddings matrix
+  │  └─ Công dụng: cho phép tra ngược từ FAISS index trở lại metadata
+  │
+  ├─ Utils:
+  │  └─ utils/: Hàm tiện ích cho embedding (load model, compute batch, save, etc.)
+  │
+  └─ requirements.txt: Thư viện cần thiết (sentence-transformers, numpy, etc.)
+
+Nhiệm vụ trong quy trình:
+  1. Nhập chunks.json từ data_processing
+  2. Load embedding model (ví dụ sentence-transformer)
+  3. Tính embedding vector cho mỗi chunk (384-d vector)
+  4. Lưu embeddings.npy và chunk_mapping.json
+
+Output chính: embeddings.npy + chunk_mapping.json (input cho FAISS indexing)
+
+Lưu ý:
+  - Embedding model phải giống lúc training và inference (để consistent)
+  - Với hàng trăm nghìn chunks, tính embedding mất thời gian → thường chạy offline
+
+
+📁 VectorDB/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / VectorDB/
+Chức năng: Xây dựng và quản lý FAISS vector index cho similarity search nhanh
+
+Nội dung:
+
+  ├─ Models:
+  │  ├─ faiss_manager.py: Lớp FAISSManager
+  │  │                    - load_index(): Tải faiss_index.bin vào RAM
+  │  │                    - search_by_text(): Query bằng text (convert → embedding → search)
+  │  │                    - Trả về top-k chunks có similarity cao nhất
+  │  └─ Công dụng: Giao diện chính để thực hiện vector search
+  │
+  ├─ Scripts:
+  │  └─ scripts/: Chứa script build_index.py
+  │              - Đọc embeddings.npy + chunk_mapping.json
+  │              - Xây dựng FAISS index (ví dụ: IVFFlat hoặc Flat)
+  │              - Lưu index vào faiss_index.bin
+  │
+  ├─ Data:
+  │  ├─ index/: Thư mục lưu trữ index files
+  │  │   └─ faiss_index.bin: FAISS index (có thể > 100MB với hàng trăm K vectors)
+  │  └─ Công dụng: Được load vào RAM khi FastAPI start, cho phép search nhanh (~ms)
+  │
+  ├─ Utils:
+  │  └─ utils/: Hàm tiện ích (normalize query, convert embedding, etc.)
+  │
+  ├─ README.md: Hướng dẫn build index
+  └─ requirements.txt: Thư viện (faiss-cpu hoặc faiss-gpu, numpy, etc.)
+
+Nhiệm vụ trong quy trình:
+  1. Nhập embeddings.npy + chunk_mapping.json từ Embeddings/
+  2. Xây dựng FAISS index (tối ưu hóa tốc độ search)
+  3. Lưu index vào faiss_index.bin
+  4. Cung cấp giao diện search cho RAG module
+
+Output chính: faiss_index.bin (sử dụng khi runtime)
+
+Lưu ý:
+  - FAISS index là core của retrieval → cần lưu giữ cẩn thận
+  - Kích thước index phụ thuộc số vectors và embedding dimension
+
+
+📁 RAG/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / RAG/
+Chức năng: Core logic của RAG system (retrieval + generation)
+
+Nội dung:
+
+  ├─ Models:
+  │  ├─ rag_system.py: Lớp RAGSystem (orchestrator chính)
+  │  │  - __init__: Khởi tạo với LLM provider, load config
+  │  │  - load(): Tải FAISS index + chunks.json + metadata
+  │  │  - search(): Tìm top-k chunks liên quan (FAISS search)
+  │  │  - query(): Main entry point
+  │  │    ├─ Tìm chunks → format prompt → gọi LLM → xử lý lỗi/retry → trả kết quả
+  │  │    ├─ Retry logic: nếu LLM fail, giảm top_k + truncate chunks + thử lại
+  │  │    └─ Fallback: trả tóm tắt chunks + thông báo lỗi nếu LLM tất cả fail
+  │  └─ Công dụng: Điểm vào chính của RAG pipeline
+  │
+  ├─ Utils:
+  │  ├─ llm_utils.py: Adapter cho các LLM providers
+  │  │  - generate_response_gemini(): Gọi Google Gemini API
+  │  │    (đã hardened: guarded access, safe parsing, multi-level retry)
+  │  │  - generate_response_openai(): Adapter cho OpenAI (optional)
+  │  │  - generate_response_claude(): Adapter cho Anthropic Claude (optional)
+  │  │  - generate_response_ollama(): Adapter cho local LLM Ollama (optional)
+  │  │  - list_gemini_models(): List available Gemini models
+  │  │  - format_prompt(): Format template cho prompt
+  │  │
+  │  ├─ gemini_logger.py: JSONL logger cho Gemini responses
+  │  │  - Log mỗi call: query, model, params, candidate info, finish_reason
+  │  │  - Giúp debug và phân tích MAX_TOKENS errors
+  │  │
+  │  └─ analyze_gemini_logs.py: Analyzer script để xem stats từ logs
+  │     (success rate, finish_reason distribution, avg answer length)
+  │
+  ├─ Test:
+  │  └─ test_search_only.py: Script test basic search functionality
+  │
+  ├─ .env: File config (GEMINI_API_KEY, LLM_MODEL, etc.)
+  │
+  └─ requirements.txt: Thư viện (google-generativeai, python-dotenv, etc.)
+
+Nhiệm vụ trong quy trình:
+  1. Nhận query từ API (FastAPI)
+  2. Search FAISS → lấy top-k chunks
+  3. Format prompt từ chunks + query
+  4. Gọi LLM (Gemini) để sinh answer
+  5. Xử lý lỗi (retry, fallback)
+  6. Trả answer + sources về client
+
+Output chính: answer (text response) + sources (metadata)
+
+Lưu ý:
+  - Đây là "heart" của RAG system — logic retry/fallback rất quan trọng
+  - Multi-level retry giúp tránh MAX_TOKENS errors
+
+
+📁 App/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: Thư mục gốc / App/
+Chức năng: Frontend + Backend API
+
+Nội dung:
+
+  ├─ api/
+  │  └─ fastapi_app.py: FastAPI backend
+  │     - Khởi tạo RAGSystem khi server start
+  │     - Endpoints:
+  │       ├─ GET /health: Kiểm tra server + RAG status
+  │       ├─ POST /chat: Nhận query, trả answer + sources
+  │       └─ POST /search: Nhận query, trả search results (chunks + distances)
+  │     - CORS: Allow requests từ Streamlit frontend
+  │
+  ├─ frontend/
+  │  └─ streamlit_app.py: Giao diện người dùng (UI)
+  │     - Sidebar settings: top_k slider, temperature, max_tokens
+  │     - Tab 1 (Chat): Chat interface
+  │       ├─ Input: text area cho câu hỏi
+  │       ├─ Output: câu trả lời + sources (expandable)
+  │       └─ History: lưu lịch sử chat
+  │     - Tab 2 (Search): Search only (không generate answer)
+  │       └─ Hiển thị chunks + similarity distances
+  │     - Features:
+  │       ├─ Health check khi start
+  │       ├─ Configurable params (top_k, temperature, max_tokens)
+  │       └─ Vietnamese UI + supporting pháp luật display
+  │
+  ├─ test_api.py: Script test endpoints
+  │  - test_health(): Kiểm tra server ready
+  │  - test_search(): Kiểm tra search endpoint
+  │  - test_chat(): Kiểm tra chat endpoint
+  │  → Chạy bằng curl hoặc `python test_api.py` (nếu install requests)
+  │
+  └─ requirements.txt: Thư viện (fastapi, uvicorn, streamlit, python-dotenv, etc.)
+
+Nhiệm vụ trong quy trình:
+  1. FastAPI: Cung cấp REST API để RAG system có thể truy cập từ client
+  2. Streamlit: Cung cấp web UI để người dùng cuối sử dụng chatbot
+  3. Test: Kiểm chứng API hoạt động
+
+Cách chạy:
+  - Backend (Terminal 1): cd App && uvicorn api.fastapi_app:app --reload --port 8000
+  - Frontend (Terminal 2): cd App && streamlit run frontend/streamlit_app.py
+  → Frontend tự động mở browser tại http://localhost:8501
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3) LUỒNG DỮ LIỆU TỔNG THỂ
+═══════════════════════════════════════════════════════════════════════════════
+
+[Dataset (HTML/TXT)] → [data_processing] → [chunks.json + metadata.json]
+                            ↓                         ↓
+                       (clean, normalize,      (input cho Embeddings)
+                        chunk, extract meta)
+                                                      ↓
+                                            [Embeddings] → [embeddings.npy]
+                                                  ↓         [chunk_mapping.json]
+                                            (sentence-                ↓
+                                             transformer)    [VectorDB] (FAISS indexing)
+                                                                    ↓
+                                                            [faiss_index.bin]
+                                                                    ↓
+                                            [RAG System]
+                                        (at runtime, load index)
+                                                    ↑
+                                    ┌───────────────┼───────────────┐
+                                    ↓               ↓               ↓
+                            (User Query)    [FAISS Search]   [LLM Generation]
+                                    ↓               ↓               ↓
+                                [API Endpoint] ← [RAG Query] → [Gemini API]
+                                    ↓
+                        [FastAPI Backend]
+                                    ↓
+                            [Streamlit UI]
+                                    ↓
+                            (User sees answer + sources)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4) TỆPCẤU HÌNH CHÍNH
+═══════════════════════════════════════════════════════════════════════════════
+
+- RAG/models/.env: Lưu GEMINI_API_KEY, LLM_MODEL, LLM_PROVIDER
+- App/frontend/streamlit_app.py: Mặc định top_k, temperature, max_tokens
+- App/api/fastapi_app.py: Path tới index, chunks, mapping; port settings
+- VectorDB/data/index/faiss_index.bin: Binary index file (load vào RAM lúc runtime)
+- data_processing/chunks.json: Danh sách chunks (large JSON, ~hàng trăm MB)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5) MỐI LIÊN HỆ GIỮA CÁC MODULE
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    FastAPI Backend (App/api/)                   │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ Endpoints: /health, /chat, /search                      │  │
+│  │ ┌──────────────────────────────────────────────────────┐ │  │
+│  │ │        RAGSystem (RAG/models/rag_system.py)         │ │  │
+│  │ │  ┌────────────────────────────────────────────────┐ │ │  │
+│  │ │  │ search() ──→ FAISSManager (VectorDB/models/)  │ │ │  │
+│  │ │  │             → faiss_index.bin (VectorDB/data/)│ │ │  │
+│  │ │  │ query()                                        │ │ │  │
+│  │ │  │  ├─ search()                                   │ │ │  │
+│  │ │  │  ├─ _format_context() ← chunks.json          │ │ │  │
+│  │ │  │  ├─ _generate_response()                      │ │ │  │
+│  │ │  │  │  └─ generate_response_gemini()            │ │ │  │
+│  │ │  │  │     (RAG/utils/llm_utils.py)              │ │ │  │
+│  │ │  │  │     ↓ [Gemini API Call]                   │ │ │  │
+│  │ │  │  ├─ [Retry logic]                            │ │ │  │
+│  │ │  │  └─ [Fallback]                               │ │ │  │
+│  │ │  └────────────────────────────────────────────────┘ │ │  │
+│  │ └──────────────────────────────────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ↓ [HTTP Response: answer + sources]                         │  │
+└─────────────────────────────────────────────────────────────────┘
+  ↓
+┌─────────────────────────────────────────────────────────────────┐
+│           Streamlit Frontend (App/frontend/)                    │
+│  [Settings: top_k, temperature, max_tokens]                    │
+│  [Chat Interface] ← [API Call] ← [FastAPI]                    │
+│  [Display: Answer + Sources]                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6) TÓMLẠI NHIỆM VỤ TỪNG FOLDER
+═══════════════════════════════════════════════════════════════════════════════
+
+| Folder         | Nhiệm vụ chính               | Input                  | Output                |
+|----------------|------------------------------|------------------------|----------------------|
+| Dataset        | Lưu dữ liệu gốc              | (Manual upload)         | HTML/TXT files        |
+| data_processing   | Làm sạch, chia chunks        | Dataset files           | chunks.json           |
+| Embeddings     | Tính embeddings              | chunks.json             | embeddings.npy        |
+| VectorDB       | Build FAISS index            | embeddings.npy          | faiss_index.bin       |
+| RAG            | Retrieval + generation logic | Query + faiss_index     | Answer + sources      |
+| App/api        | REST API backend             | RAGSystem               | HTTP endpoints        |
+| App/frontend   | Web UI                       | HTTP API                | User interface        |
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7) ĐẶCĐIỂM KIẾN TRÚC
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Modular: Mỗi folder độc lập, có thể update từng phần
+✓ Pipeline: Dữ liệu chảy từ Dataset → RAG → Output rõ ràng
+✓ Separation of concerns: Frontend ≠ Backend ≠ Data processing
+✓ Scalable: Có thể thay embeddings, LLM, hoặc VectorDB
+✓ Robustness: Multi-level retry, fallback mechanism, error handling
+✓ Observability: Logging (Gemini responses), health check endpoints
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,607 @@
+═══════════════════════════════════════════════════════════════════════════════
+PROMPT ENGINEERING GUIDE - DỰ ÁN CHATBOT PHÁP LUẬT VIỆT NAM
+═══════════════════════════════════════════════════════════════════════════════
+
+1) TỔNG QUAN
+─────────────────────────────────────────────────────────────────────────────
+
+Prompt Engineering là quá trình thiết kế (design) các câu lệnh (prompts) để hướng 
+dẫn LLM (Large Language Model) trả lời chính xác, đặc biệt trong lĩnh vực pháp luật 
+yêu cầu độ chính xác cao.
+
+Dự án sử dụng 2 file chính chứa prompt engineering:
+  1. RAG/utils/llm_utils.py → function format_prompt()
+  2. RAG/models/rag_system.py → function _format_context()
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2) CẤU TRÚC PROMPT HIỆN TẠI
+═══════════════════════════════════════════════════════════════════════════════
+
+2.1) Vị trí code
+─────────────────────────────────────────────────────────────────────────────
+
+File: RAG/utils/llm_utils.py (dòng 16-43)
+Function: format_prompt(query: str, context: str) -> str
+
+
+2.2) Cấu trúc prompt chi tiết
+─────────────────────────────────────────────────────────────────────────────
+
+Prompt được chia thành 5 phần:
+
+┌─ PHẦN 1: ROLE & CONTEXT (dòng 27-28)
+│
+│ Nội dung:
+│   "Bạn là trợ lý pháp luật chuyên nghiệp. Nhiệm vụ của bạn là trả lời câu hỏi 
+│    về pháp luật Việt Nam dựa trên các điều luật được cung cấp."
+│
+│ Mục đích:
+│   ✓ Định nghĩa role của AI (trợ lý pháp luật)
+│   ✓ Giới hạn domain (pháp luật Việt Nam)
+│   ✓ Thiết lập expectation (chỉ dựa trên thông tin được cung cấp)
+│
+│ Chiến lược:
+│   - Rõ ràng, ngắn gọn (avoid verbose)
+│   - Sử dụng "trợ lý chuyên nghiệp" → suggest credibility
+│   - "dựa trên các điều luật" → trigger citation behavior
+
+
+├─ PHẦN 2: HƯỚNG DẪN (dòng 30-35)
+│
+│ Nội dung:
+│   "Hướng dẫn:
+│    - Trả lời chính xác, rõ ràng và dễ hiểu
+│    - Chỉ dựa vào thông tin trong các điều luật được cung cấp
+│    - Nếu không tìm thấy thông tin, hãy nói rõ 'Tôi không tìm thấy thông tin...'
+│    - Luôn trích dẫn số điều luật khi trả lời
+│    - Trả lời bằng tiếng Việt"
+│
+│ Mục đích:
+│   ✓ Định rõ constraints (không confabulate, cite sources)
+│   ✓ Enforce accuracy (pháp luật không thể sai)
+│   ✓ Enforce language (Vietnamese)
+│
+│ Chi tiết từng rule:
+│   1. "Trả lời chính xác, rõ ràng, dễ hiểu"
+│      → Optimize for clarity + correctness (pháp luật domain)
+│   2. "Chỉ dựa vào thông tin trong các điều luật"
+│      → Anti-hallucination rule (rất quan trọng)
+│   3. "Nếu không tìm thấy → nói rõ"
+│      → Uncertainty handling (better to admit unknown than guess)
+│   4. "Luôn trích dẫn số điều luật"
+│      → Citation requirement (track evidence)
+│   5. "Trả lời bằng tiếng Việt"
+│      → Language enforcement
+
+
+├─ PHẦN 3: CONTEXT (dòng 37-38)
+│
+│ Nội dung:
+│   "Các điều luật liên quan:
+│    {context}"
+│
+│ Mục đích:
+│   ✓ Injected retrieved chunks từ FAISS search
+│   ✓ Format: mỗi chunk là [Chương/Điều/Nội dung]
+│
+│ Format từ _format_context() (RAG/models/rag_system.py):
+│   [1] Chương I: Những quy định chung
+│       Điều 1: Phạm vi điều chỉnh
+│       Loại văn bản: Luật
+│       Nội dung: Luật này quy định về...
+│
+│   [2] Chương II: ...
+│       Điều 2: ...
+│       ...
+│
+│   (Tối đa 5 chunks, được format bởi _format_context)
+
+
+├─ PHẦN 4: QUERY (dòng 40)
+│
+│ Nội dung:
+│   "Câu hỏi: {query}"
+│
+│ Mục đích:
+│   ✓ Explicit query separator
+│   ✓ Giúp model phân biệt query từ context
+
+
+└─ PHẦN 5: RESPONSE TRIGGER (dòng 42)
+  
+  Nội dung:
+    "Trả lời:"
+  
+  Mục đích:
+    ✓ Trigger response generation (model knows to start answering now)
+    ✓ Explicit separator (stop context, start response)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3) CONTEXT FORMATTING (_format_context)
+═══════════════════════════════════════════════════════════════════════════════
+
+3.1) Vị trí code
+─────────────────────────────────────────────────────────────────────────────
+
+File: RAG/models/rag_system.py (dòng 269-297)
+Function: _format_context(self, chunks: List[Dict]) -> str
+
+
+3.2) Cách hoạt động
+─────────────────────────────────────────────────────────────────────────────
+
+Input:  List of chunks từ FAISS search
+        Ví dụ: [
+                 {
+                   'content': 'Luật này quy định về...',
+                   'metadata': {
+                     'dieu': 'Điều 1: Phạm vi điều chỉnh',
+                     'chuong': 'Chương I: Những quy định chung',
+                     'loai_van_ban': 'Luật',
+                     ...
+                   }
+                 },
+                 ...
+               ]
+
+Process:
+  1. Loop qua từng chunk (numbered [1], [2], ...)
+  2. Extract metadata: chapter, article, document type
+  3. Format theo template:
+     [i] {Chapter}
+         {Article}
+         Loại văn bản: {Type}
+         Nội dung: {Content}
+  4. Join chunks với "\n\n" separator
+
+Output: Formatted string ready for LLM
+
+Ví dụ output:
+  [1] Chương I: Những quy định chung
+      Điều 1: Phạm vi điều chỉnh
+      Loại văn bản: Luật
+      Nội dung: Luật Đất đai năm 2024 quy định về...
+
+  [2] Chương II: Quyền sở hữu đất
+      Điều 5: Các hình thức sở hữu
+      Loại văn bản: Luật
+      Nội dung: Quyền sở hữu đất bao gồm...
+
+
+3.3) Design rationale
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Numbering [1], [2]: Helps model refer back ("theo điều 1 được cung cấp")
+✓ Hierarchy (Chapter > Article): Shows structure, important for legal docs
+✓ Document type: Context cue (Luật vs Nghị định có khác nhau)
+✓ Content explicit: Full text, not summary (avoid loss of detail)
+✓ Preview length: Full chunks (not truncated) để LLM có đủ context
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4) PARAMETERS CHO LLM GENERATION
+═══════════════════════════════════════════════════════════════════════════════
+
+4.1) Vị trí config
+─────────────────────────────────────────────────────────────────────────────
+
+File: RAG/utils/llm_utils.py
+Function: generate_response_gemini() (dòng 443-565)
+File: RAG/models/rag_system.py
+RAGSystem.__init__() (dòng 44-100) - set defaults
+
+
+4.2) Tham số quan trọng
+─────────────────────────────────────────────────────────────────────────────
+
+┌─ TEMPERATURE
+│
+│ Định nghĩa: Độ "sáng tạo" hay "thủ cẩn" của model (0.0 - 1.0)
+│ Giá trị hiện tại (default): 0.7
+│
+│ Tác động:
+│   - temp = 0.0: Deterministic, always same answer (too rigid for varied queries)
+│   - temp = 0.3: Focused, precise (recommend cho pháp luật)
+│   - temp = 0.7: Balanced (default, good for variety)
+│   - temp = 1.0: Random, creative (risky for legal domain)
+│
+│ Khuyến nghị:
+│   - Pháp luật cần precision → reduce temp to 0.3-0.5
+│   - Hiện tại 0.7 là safe choice (avoid too rigid)
+│   - Có thể tuning dựa trên user feedback (accuracy vs variety)
+│
+│ Trong code:
+│   RAG/models/rag_system.py, line 47: self.temperature = 0.7
+│   Streamlit slider: default 0.7, range 0.0-1.0
+
+
+├─ MAX_TOKENS
+│
+│ Định nghĩa: Max độ dài response (số tokens)
+│ Giá trị hiện tại (default): 1500
+│ Giới hạn Gemini: 8191 tokens cho pro model
+│
+│ Tác động:
+│   - Quá nhỏ (500): Response bị cắt ngắn, mất thông tin
+│   - Vừa phải (1200-1500): Đủ cho câu trả lời pháp luật
+│   - Quá lớn (2000+): Risk MAX_TOKENS errors khi prompt + output > limit
+│
+│ Khuyến nghị:
+│   - Keep 1200-1500 (balanced)
+│   - Avoid > 2000 (risk of failures)
+│   - Token budget: prompt (~2000 tokens) + output (1500) = ~3500 total
+│   - Gemini limit 8191 → safe margin
+│
+│ Trong code:
+│   RAG/models/rag_system.py, line 48: self.max_tokens = 1500
+│   Streamlit slider: default 1500, range 500-2000
+│   Fallback: if error, truncate + retry with reduced max_tokens
+
+
+├─ TOP_K (RETRIEVAL PARAMETER)
+│
+│ Định nghĩa: Số chunks tìm được từ FAISS search
+│ Giá trị hiện tại (default): 3
+│ Max limit (enforced): 5
+│
+│ Tác động:
+│   - top_k = 1-2: Minimal context (fast, but may miss relevant info)
+│   - top_k = 3-5: Balanced (recommended)
+│   - top_k > 5: Risk of prompt overflow (MAX_TOKENS errors)
+│
+│ Khuyến nghị:
+│   - Default 3 (good balance)
+│   - Max capped at 5 (safety measure)
+│   - If MAX_TOKENS error, retry with top_k=3, then 2, then 1
+│   - Each chunk ~300-500 tokens → 5 chunks ≈ 1500-2500 tokens
+│
+│ Trong code:
+│   RAG/models/rag_system.py, line 49: self.top_k = 3
+│   Enforcement: line 148 top_k = min(top_k or self.top_k, 5)
+│   Streamlit slider: default 3, range 1-10 (but capped at 5 in backend)
+
+
+└─ TOKEN BUDGET CALCULATION
+  
+  Total tokens = prompt_tokens + output_tokens ≤ model_max_tokens
+  
+  Estimate:
+    - Prompt overhead (role, instructions): ~200 tokens
+    - Context (5 chunks × 400 tokens/chunk): ~2000 tokens
+    - Query (50-200 tokens typical): ~100 tokens
+    - Total prompt: ~2300 tokens
+    - Output max: 1500 tokens
+    - Total: ~3800 tokens (safe within 8191 limit)
+  
+  If over budget:
+    1. Reduce top_k (5 → 4 → 3 → 2)
+    2. Reduce max_tokens (1500 → 1200 → 800)
+    3. Truncate each chunk (800 chars → 600 → 400)
+    → This is what multi-level retry does
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5) MULTI-LEVEL RETRY LOGIC
+═══════════════════════════════════════════════════════════════════════════════
+
+5.1) Vị trí code
+─────────────────────────────────────────────────────────────────────────────
+
+File: RAG/models/rag_system.py (dòng 183-250)
+Function: query() - retry loop
+
+
+5.2) Khi nào trigger retry?
+─────────────────────────────────────────────────────────────────────────────
+
+Retry được triggered khi:
+  1. LLM returns finish_reason = "MAX_TOKENS" (model hit token limit)
+  2. LLM returns finish_reason = 2 (internal error code)
+  3. Response.text quick-accessor raises ValueError
+  4. Response has no valid content (parts empty)
+
+
+5.3) Retry strategy (trong code)
+─────────────────────────────────────────────────────────────────────────────
+
+Retry sequence: Progressive reduction in scope
+
+  Attempt 1: Original parameters (top_k, max_tokens, temperature)
+  ├─ If success: return answer
+  └─ If fail (MAX_TOKENS): proceed to Attempt 2
+
+  Attempt 2: Reduced top_k (min(4, original_top_k))
+  ├─ Truncate each chunk to 800 chars
+  ├─ Temperature × 0.7 = 0.49 (more conservative)
+  ├─ max_tokens reduced
+  └─ If fail: proceed to Attempt 3
+
+  Attempt 3: Further reduced top_k (3)
+  ├─ Truncate each chunk to 600 chars
+  ├─ Temperature × 0.7 again = 0.34
+  └─ If fail: proceed to Attempt 4
+
+  Attempt 4: Minimal (top_k=2)
+  ├─ Truncate each chunk to 400 chars
+  ├─ Temperature × 0.7 again = 0.24
+  └─ If fail: return FALLBACK
+
+  Fallback: Return chunks without LLM generation
+  ├─ User gets raw chunks formatted nicely
+  ├─ Error message explaining why (MAX_TOKENS)
+  └─ Better UX than 500 error
+
+
+5.4) Rationale
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Why progressive reduction?
+  - Each step is smaller than previous (not random)
+  - top_k reduction: fewer chunks → smaller prompt
+  - Chunk truncation: shorter context → saves tokens
+  - Temperature reduction: less creative → more deterministic
+
+✓ Why not just use smaller defaults?
+  - Want richness of full context when possible
+  - Fallback to minimal only if needed
+  - Provides grace-full degradation (better than error)
+
+✓ Why temperature reduction?
+  - Conservative model behavior when constrained
+  - Reduce risk of hallucination with minimal context
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6) ANTI-HALLUCINATION STRATEGIES
+═══════════════════════════════════════════════════════════════════════════════
+
+Hallucination = Model generates plausible-sounding but false information.
+In legal domain, hallucination is CRITICAL failure.
+
+Strategies implemented:
+
+1️⃣ ROLE SPECIFICATION
+   "Bạn là trợ lý pháp luật chuyên nghiệp"
+   → Grounds model in legal domain expertise
+
+2️⃣ SOURCE CONSTRAINT
+   "Chỉ dựa vào thông tin trong các điều luật được cung cấp"
+   → Explicit instruction: don't use external knowledge
+
+3️⃣ UNCERTAINTY HANDLING
+   "Nếu không tìm thấy thông tin, hãy nói rõ..."
+   → Encourage admission of uncertainty
+   → Better than fake answer
+
+4️⃣ CITATION REQUIREMENT
+   "Luôn trích dẫn số điều luật khi trả lời"
+   → Track evidence
+   → Force model to reference (if can't, skip answer)
+
+5️⃣ FALLBACK MECHANISM
+   If LLM fails → return raw chunks + error message
+   → User gets something, not blank error
+
+6️⃣ TEMPERATURE TUNING
+   Lower temperature when context is constrained
+   → More deterministic, less creative
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7) EXAMPLES CỦA PROMPT FORMATTING
+═══════════════════════════════════════════════════════════════════════════════
+
+7.1) Example 1: Simple query
+─────────────────────────────────────────────────────────────────────────────
+
+Query: "Phạm vi điều chỉnh của Luật Đất đai là gì?"
+
+Retrieved chunks (top_k=2):
+  [1] Điều 1: Phạm vi điều chỉnh
+      Content: "Luật này quy định về..."
+  [2] Điều 2: Đối tượng áp dụng
+      Content: "Luật này áp dụng cho..."
+
+Final prompt:
+  Bạn là trợ lý pháp luật chuyên nghiệp. Nhiệm vụ của bạn là trả lời câu hỏi 
+  về pháp luật Việt Nam dựa trên các điều luật được cung cấp.
+  
+  Hướng dẫn:
+  - Trả lời chính xác, rõ ràng và dễ hiểu
+  - Chỉ dựa vào thông tin trong các điều luật được cung cấp
+  - Nếu không tìm thấy thông tin, hãy nói rõ "Tôi không tìm thấy thông tin..."
+  - Luôn trích dẫn số điều luật khi trả lời
+  - Trả lời bằng tiếng Việt
+  
+  Các điều luật liên quan:
+  [1] Chương I: Những quy định chung
+      Điều 1: Phạm vi điều chỉnh
+      Loại văn bản: Luật
+      Nội dung: Luật này quy định về thửa đất, toàn bộ tài sản gắn liền với đất...
+  
+  [2] Chương I: Những quy định chung
+      Điều 2: Đối tượng áp dụng
+      Loại văn bản: Luật
+      Nội dung: Luật này áp dụng cho tất cả tổ chức, cá nhân...
+  
+  Câu hỏi: Phạm vi điều chỉnh của Luật Đất đai là gì?
+  
+  Trả lời:
+
+Expected answer:
+  "Theo Điều 1 của Luật Đất đai, phạm vi điều chỉnh bao gồm:
+   [cites Điều 1 content]
+   Luật này áp dụng cho [cites Điều 2]..."
+
+
+7.2) Example 2: Query when no matching chunks
+─────────────────────────────────────────────────────────────────────────────
+
+Query: "Quy định về ngành công nghiệp tài chính" (không liên quan đến pháp luật đất)
+
+Retrieved chunks: 0 (or low relevance chunks)
+
+Model behavior:
+  ✓ With anti-hallucination rules: "Tôi không tìm thấy thông tin..."
+  ✗ Without: might generate plausible-sounding but false regulations
+
+This is why rules are critical!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8) TUNING & OPTIMIZATION
+═══════════════════════════════════════════════════════════════════════════════
+
+8.1) When to adjust prompt
+─────────────────────────────────────────────────────────────────────────────
+
+Scenario 1: Answers too verbose
+  Action: Add instruction "Trả lời ngắn gọn, không quá 3 câu"
+  
+Scenario 2: Missing citations
+  Action: Emphasize "Bắt buộc: Luôn trích dẫn số Điều, số Khoản"
+  
+Scenario 3: Model ignoring context (using external knowledge)
+  Action: Stronger rule "Chỉ sử dụng thông tin từ các điều luật được cung cấp. 
+            Không được sử dụng kiến thức bên ngoài."
+  
+Scenario 4: Too many false positives
+  Action: Reduce top_k (get higher-relevance chunks only)
+  
+Scenario 5: Model too conservative (refusing to answer valid questions)
+  Action: Adjust temperature slightly up (0.5 → 0.6)
+
+
+8.2) Where to edit prompts
+─────────────────────────────────────────────────────────────────────────────
+
+Main prompt template:
+  📄 RAG/utils/llm_utils.py (line 27-42)
+  Function: format_prompt()
+  
+  Edit this to change:
+    - Role definition
+    - Constraints/guidelines
+    - Output format
+    - Language/tone
+
+Context formatting:
+  📄 RAG/models/rag_system.py (line 269-297)
+  Function: _format_context()
+  
+  Edit this to change:
+    - How chunks are displayed
+    - What metadata to include
+    - Numbering/formatting
+
+
+8.3) A/B testing suggestions
+─────────────────────────────────────────────────────────────────────────────
+
+Variant A (Current):
+  "Nếu không tìm thấy thông tin, hãy nói rõ 'Tôi không tìm thấy...'"
+  
+Variant B (Stronger):
+  "Bắt buộc: Nếu không tìm thấy thông tin trong các điều luật được cung cấp, 
+   hãy trả lời chính xác rằng thông tin này không có."
+
+→ Test which reduces hallucination more
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9) INTEGRATION FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+1. User asks question in Streamlit UI
+
+2. Frontend sends to backend:
+   POST /chat
+   {
+     "query": "...",
+     "top_k": 3,
+     "temperature": 0.7,
+     "max_tokens": 1500
+   }
+
+3. Backend RAGSystem.query():
+   a) Search FAISS with top_k=3 → returns 3 chunks
+   b) Call _format_context(chunks) → formatted string
+   c) Call format_prompt(query, context) → full prompt
+   d) Call generate_response_gemini(prompt, ...) → LLM response
+   e) On error → retry with reduced params
+   f) On success → return answer + sources
+
+4. Frontend displays:
+   - Answer (formatted text)
+   - Sources (expandable, showing [1] Điều X ...)
+   - Retry info (if applicable)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+10) CURRENT LIMITATIONS & FUTURE IMPROVEMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Current strengths:
+  - Clear role definition (legal assistant)
+  - Strong anti-hallucination rules
+  - Citation requirement enforced
+  - Fallback mechanism (graceful degradation)
+  - Multi-level retry (automatic recovery)
+
+⚠️ Current limitations:
+  - Prompt is fixed (not adaptive to query complexity)
+  - No few-shot examples (could improve accuracy)
+  - Simple concatenation (no ranking of chunks)
+  - Max 5 chunks (could dynamically adjust)
+
+🎯 Future improvements:
+  1. Few-shot prompting: Add 2-3 example QA pairs
+     → Improves consistency
+  
+  2. Dynamic prompt: Adjust based on query length/complexity
+     → Optimize for different query types
+  
+  3. Chunk ranking: Show most relevant first
+     → Help model focus on key info
+  
+  4. Chain-of-thought: "Hãy lập luận từng bước"
+     → Better reasoning in complex legal questions
+  
+  5. Multi-turn conversation: Maintain context across turns
+     → Better for follow-up questions
+
+
+═══════════════════════════════════════════════════════════════════════════════
+11) QUICK REFERENCE - WHERE TO FIND THINGS
+═══════════════════════════════════════════════════════════════════════════════
+
+Prompt template:
+  📄 RAG/utils/llm_utils.py, line 16-43
+  Function: format_prompt(query, context)
+
+Context formatting:
+  📄 RAG/models/rag_system.py, line 269-297
+  Function: _format_context(chunks)
+
+LLM parameters (defaults):
+  📄 RAG/models/rag_system.py, line 44-49
+  - temperature: 0.7
+  - max_tokens: 1500
+  - top_k: 3
+
+Retry logic:
+  📄 RAG/models/rag_system.py, line 183-250
+  Multi-level retry with progressive truncation
+
+UI parameters (Streamlit):
+  📄 App/frontend/streamlit_app.py, line ~70-100
+  Sliders for top_k, temperature, max_tokens
+
+Generation (Gemini API):
+  📄 RAG/utils/llm_utils.py, line 443-565
+  Function: generate_response_gemini()
+
+
+═══════════════════════════════════════════════════════════════════════════════

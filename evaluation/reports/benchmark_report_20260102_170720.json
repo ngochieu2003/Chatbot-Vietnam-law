@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-01-02T17:07:35.833898",
+  "test_queries_count": 1,
+  "iterations": 3,
+  "search_benchmark": {
+    "success": true,
+    "total_queries": 3,
+    "successful_queries": 3,
+    "min_time": 0.11002540588378906,
+    "max_time": 0.5545172691345215,
+    "avg_time": 0.2624465624491374,
+    "median_time": 0.12279701232910156,
+    "std_time": 0.25302124764646394,
+    "p95_time": 0.5545172691345215,
+    "p99_time": 0.5545172691345215,
+    "throughput_qps": 3.8102994783701987
+  },
+  "query_benchmark": {
+    "success": true,
+    "total_queries": 3,
+    "successful_queries": 3,
+    "min_time": 8.896682739257812,
+    "max_time": 18.74177885055542,
+    "avg_time": 14.46385391553243,
+    "median_time": 15.753100156784058,
+    "std_time": 5.047583210122236,
+    "p95_time": 18.74177885055542,
+    "p99_time": 18.74177885055542,
+    "throughput_qps": 0.0691378664248068,
+    "avg_answer_length": 1427.6666666666667
+  },
+  "concurrent_benchmark": {
+    "success": true,
+    "total_queries": 1,
+    "successful_queries": 1,
+    "failed_queries": 0,
+    "total_time": 8.896080255508423,
+    "avg_time": 8.89580488204956,
+    "min_time": 8.89580488204956,
+    "max_time": 8.89580488204956,
+    "throughput_qps": 0.11240905784104223
+  }
+}

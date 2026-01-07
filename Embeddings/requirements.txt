@@ -1,0 +1,14 @@
+# Requirements cho Embeddings Module
+
+# Core dependencies
+sentence-transformers>=2.2.0
+numpy>=1.24.0,<2.0.0  # Fix: NumPy 2.x không tương thích với sklearn và các thư viện khác
+torch>=2.0.0
+
+# Utilities
+tqdm>=4.65.0
+
+# Optional: GPU support (uncomment nếu có GPU)
+# torch>=2.0.0+cu118  # Cho CUDA 11.8
+# torch>=2.0.0+cu121  # Cho CUDA 12.1
+

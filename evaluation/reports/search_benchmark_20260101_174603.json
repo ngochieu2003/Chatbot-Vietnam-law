@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "total_queries": 15,
+  "successful_queries": 15,
+  "min_time": 0.10515904426574707,
+  "max_time": 0.7931480407714844,
+  "avg_time": 0.1642467975616455,
+  "median_time": 0.10720515251159668,
+  "std_time": 0.1779832374607351,
+  "p95_time": 0.7931480407714844,
+  "p99_time": 0.7931480407714844,
+  "throughput_qps": 6.088398768473264,
+  "retrieval_quality": {
+    "avg_distance": 7.880341625213623,
+    "min_distance": 6.810876846313477,
+    "max_distance": 8.917881965637207,
+    "total_results": 75,
+    "avg_chunks_per_query": 5
+  }
+}

@@ -1,0 +1,794 @@
+═══════════════════════════════════════════════════════════════════════════════
+PHẦN II: CHUẨN BỊ VÀ TIỀN XỬ LÝ DỮ LIỆU
+═══════════════════════════════════════════════════════════════════════════════
+
+1) TỔNG QUAN
+─────────────────────────────────────────────────────────────────────────────
+
+Tiền xử lý dữ liệu (Data Preprocessing) là bước cầu nối giữa dữ liệu gốc (raw data) 
+và mô hình AI. Bước này đảm bảo:
+  ✓ Dữ liệu sạch, không chứa nhiễu
+  ✓ Format chuẩn (UTF-8, encoding đúng)
+  ✓ Có thể chia thành chunks phù hợp với embedding model
+  ✓ Có metadata đầy đủ để trích dẫn nguồn
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2) CẤU TRÚC DỮ LIỆU GỐC (DATASET)
+═══════════════════════════════════════════════════════════════════════════════
+
+2.1) Vị trí lưu trữ
+─────────────────────────────────────────────────────────────────────────────
+Đường dẫn: /chatbot_rag/Dataset/
+Loại dữ liệu: 
+  - Tệp HTML (từ website pháp luật)
+  - Tệp TXT (văn bản đơn giản)
+  - Tệp PDF (tài liệu pháp luật chính thức) - nếu có
+
+
+2.2) Nội dung dữ liệu gốc
+─────────────────────────────────────────────────────────────────────────────
+Dữ liệu là tập hợp các văn bản pháp luật Việt Nam, bao gồm:
+
+┌─ Luật:
+│  ├─ Luật Đất đai
+│  ├─ Luật Lao động
+│  ├─ Luật Công ty
+│  └─ Luật Bảo vệ môi trường
+│
+├─ Nghị định (Quy định chi tiết thực hiện luật)
+│  ├─ Nghị định về xử phạt vi phạm hành chính
+│  ├─ Nghị định về thủ tục thành lập công ty
+│  └─ Nghị định về điều chỉnh phạm vi áp dụng
+│
+├─ Thông tư (Hướng dẫn chi tiết từ Bộ/Sở)
+│
+└─ Quyết định (Các quyết định của Chính phủ/Bộ trưởng)
+
+
+2.3) Cấu trúc thường gặp trong tệp gốc
+─────────────────────────────────────────────────────────────────────────────
+
+Tệp HTML thường chứa:
+  - Meta tags (tên website, ngày crawl)
+  - Navigation HTML (menu, header, footer) — CẦN LOẠI BỎ
+  - Nội dung chính (số vănbản, ngày ban hành, phần mở đầu, nội dung chi tiết)
+  - Thẻ div/span chứa định dạng (cần giữ cấu trúc logic)
+  - HTML entities (&nbsp;, &quot;, etc.) — CẦN GIẢI MÃ
+  - Script/Style tags — CẦN LOẠI BỎ
+
+Ví dụ:
+  <html>
+    <head><title>Luật Đất đai 2024</title></head>
+    <body>
+      <nav>Menu website...</nav>  ← LOẠI BỎ
+      <div class="content">
+        <h1>LUẬT ĐẤT ĐAI</h1>
+        <p>Số hiệu: 45/2024/QH15</p>
+        <p>Ngày ban hành: 15/11/2024</p>
+        <h2>Chương I: Những quy định chung</h2>
+        <div class="article">
+          <h3>Điều 1: Phạm vi điều chỉnh</h3>
+          <p>Luật này quy định về...</p>  ← GIỮ LẠI
+        </div>
+      </div>
+    </body>
+  </html>
+
+Tệp TXT thường đã làm sạch, chỉ chứa text, nhưng có thể:
+  - Có khoảng trắng thừa
+  - Encoding sai (Latin-1, CP1252 thay vì UTF-8)
+  - Ngắt dòng không nhất quán
+
+
+2.4) Kích thước dữ liệu gốc
+─────────────────────────────────────────────────────────────────────────────
+Dự kiến:
+  - Số lượng tệp: 100-500 tệp
+  - Kích thước từng tệp: 50KB - 10MB
+  - Tổng dung lượng: 500MB - 5GB
+  - Số ký tự: hàng chục triệu (sau xử lý)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3) QUY TRÌNH TIỀN XỬ LÝ DỮ LIỆU (DATA PREPROCESSING PIPELINE)
+═══════════════════════════════════════════════════════════════════════════════
+
+3.1) Sơ đồ tổng quan quy trình
+─────────────────────────────────────────────────────────────────────────────
+
+  ┌──────────────────┐
+  │ Dữ liệu gốc      │
+  │ (HTML/TXT/PDF)   │
+  └────────┬─────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 1: Tải & Giải mã    │
+  │ (Load & Decode)          │
+  │ - Đọc file với encoding  │
+  │ - Giải mã HTML entities  │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 2: Loại bỏ HTML     │
+  │ (HTML Removal)           │
+  │ - Xóa tags, scripts      │
+  │ - Giữ lại text content   │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 3: Làm sạch text    │
+  │ (Text Cleaning)          │
+  │ - Xóa khoảng trắng thừa  │
+  │ - Chuẩn hóa line breaks  │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 4: Chuẩn hoá ngôn   │
+  │ ngữ (Text Normalization) │
+  │ - Dấu câu chuẩn          │
+  │ - Định dạng số, ngày     │
+  │ - Viết tắt → viết đầy    │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 5: Trích metadata   │
+  │ (Metadata Extraction)    │
+  │ - Số văn bản, ngày       │
+  │ - Chương, điều, khoản    │
+  │ - Từ khóa, phạm vi       │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 6: Chia chunks      │
+  │ (Chunking)               │
+  │ - Chia đoạn 200-800 ký tự│
+  │ - Overlap giữa chunks    │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 7: Loại trùng       │
+  │ (Deduplication)          │
+  │ - So sánh hash/similarity│
+  │ - Xóa chunks giống nhau  │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ BƯỚC 8: Kiểm tra chất    │
+  │ lượng (Quality Check)    │
+  │ - Độ dài chunk OK?       │
+  │ - Metadata đầy đủ?       │
+  │ - Encoding chuẩn?        │
+  └────────┬─────────────────┘
+           │
+           ▼
+  ┌──────────────────────────┐
+  │ Output:                  │
+  │ - chunks.json            │
+  │ - metadata.json          │
+  │ - cleaned_data/          │
+  │ - quality_report.json    │
+  └──────────────────────────┘
+
+
+3.2) Chi tiết từng bước xử lý
+─────────────────────────────────────────────────────────────────────────────
+
+┌─ BƯỚC 1: TẢI & GIẢI MÃ DỮ LIỆU
+│
+│ Script: data_cleaner.py (initial load phase)
+│
+│ Mục đích:
+│   - Đọc file gốc (HTML/TXT/PDF)
+│   - Xác định & chuyển sang UTF-8
+│   - Giải mã HTML entities (&nbsp; → space, &quot; → ", etc.)
+│
+│ Input: Raw file (có thể CP1252, Latin-1)
+│ Output: Text string (UTF-8)
+│
+│ Ví dụ:
+│   Input:  "&nbsp;Luật&nbsp;Đất&nbsp;đai&nbsp;2024"
+│   Output: " Luật Đất đai 2024"
+│
+│ Code pattern:
+│   from html import unescape
+│   import chardet
+│
+│   # Detect encoding
+│   with open(file, 'rb') as f:
+│       raw = f.read()
+│       detected = chardet.detect(raw)
+│
+│   # Decode with detected encoding
+│   text = raw.decode(detected['encoding'], errors='ignore')
+│
+│   # Unescape HTML entities
+│   text = unescape(text)
+
+
+├─ BƯỚC 2: LOẠI BỎ HTML TAGS & SCRIPTS
+│
+│ Script: data_cleaner.py (HTML removal)
+│
+│ Mục đích:
+│   - Xóa <script>, <style>, <nav>, <footer>, etc.
+│   - Giữ lại text content
+│   - Giữ cấu trúc logic (headings, paragraphs)
+│
+│ Input: HTML text
+│ Output: Text sạch (không có HTML tags)
+│
+│ Ví dụ:
+│   Input:  "<div><h1>Luật Đất đai</h1><p>Số hiệu: 45/2024</p></div>"
+│   Output: "Luật Đất đai\nSố hiệu: 45/2024"
+│
+│ Code pattern:
+│   from bs4 import BeautifulSoup
+│
+│   soup = BeautifulSoup(html_text, 'html.parser')
+│
+│   # Remove unwanted tags
+│   for tag in soup(['script', 'style', 'nav', 'footer', 'header']):
+│       tag.decompose()
+│
+│   # Get clean text
+│   text = soup.get_text(separator='\n', strip=True)
+
+
+├─ BƯỚC 3: LÀM SẠCH TEXT
+│
+│ Script: data_cleaner.py (text cleaning)
+│
+│ Mục đích:
+│   - Xóa khoảng trắng thừa (leading/trailing/multiple spaces)
+│   - Chuẩn hoá line breaks (multiple newlines → single newline)
+│   - Xóa ký tự đặc biệt (tabs, carriage returns)
+│
+│ Input: Raw text
+│ Output: Clean text
+│
+│ Ví dụ:
+│   Input:  "Luật  Đất  đai\n\n\nNgày ban hành:   2024"
+│   Output: "Luật Đất đai\nNgày ban hành: 2024"
+│
+│ Code pattern:
+│   import re
+│
+│   # Remove multiple spaces
+│   text = re.sub(r' +', ' ', text)
+│
+│   # Remove multiple newlines
+│   text = re.sub(r'\n\n+', '\n', text)
+│
+│   # Strip leading/trailing whitespace
+│   text = text.strip()
+
+
+├─ BƯỚC 4: CHUẨN HOÁ NGÔN NGỮ
+│
+│ Script: text_normalizer.py
+│
+│ Mục đích:
+│   - Chuẩn hoá dấu câu (…→ ..., "→ ", —→ -)
+│   - Định dạng số (1.000.000 → 1000000 hoặc giữ nguyên)
+│   - Định dạng ngày (15/11/2024, 15-11-2024 → chuẩn 15/11/2024)
+│   - Viết tắt → viết đầy (VD → Ví dụ, etc. → vân vân, v.v.)
+│   - Thống nhất cách viết (Tòa án → Tòa Án, Ủy ban → Ủy ban)
+│
+│ Input: Text sạch
+│ Output: Text chuẩn hóa
+│
+│ Ví dụ:
+│   Input:  "Luật Đất Đai quy định: VD: Tòa án phải xử lý vd. trong..."
+│   Output: "Luật Đất Đai quy định: Ví dụ: Tòa Án phải xử lý ví dụ trong..."
+│
+│ Code pattern:
+│   import re
+│   from datetime import datetime
+│
+│   # Normalize abbreviations
+│   abbreviations = {
+│       r'\bVD\b': 'Ví dụ',
+│       r'\bvd\.\b': 'ví dụ',
+│       r'\betc\.\b': 'vân vân',
+│   }
+│   for pattern, replacement in abbreviations.items():
+│       text = re.sub(pattern, replacement, text)
+│
+│   # Normalize dates
+│   text = re.sub(r'(\d{1,2})-(\d{1,2})-(\d{4})', r'\1/\2/\3', text)
+│
+│   # Normalize punctuation
+│   text = text.replace('…', '...')
+│   text = text.replace('"', '"')
+│   text = text.replace('"', '"')
+
+
+├─ BƯỚC 5: TRÍCH XUẤT METADATA
+│
+│ Script: metadata_extractor.py
+│
+│ Mục đích:
+│   - Trích xuất thông tin: số văn bản, ngày ban hành, ngày có hiệu lực
+│   - Trích xuất cấu trúc: Chương, Điều, Khoản
+│   - Trích xuất từ khóa, phạm vi áp dụng
+│   - Lưu trữ dưới dạng JSON
+│
+│ Input: Clean text
+│ Output: Metadata dict (JSON serializable)
+│
+│ Ví dụ:
+│   {
+│       "document_id": "45/2024/QH15",
+│       "title": "Luật Đất đai",
+│       "issued_date": "2024-11-15",
+│       "effective_date": "2025-01-01",
+│       "category": "Luật",
+│       "chapters": 8,
+│       "articles": 267,
+│       "keywords": ["bất động sản", "đất đai", "sở hữu đất"],
+│       "scope": ["Toàn quốc"],
+│       "source_url": "https://..."
+│   }
+│
+│ Regex patterns:
+│   - Số hiệu: r'Số hiệu:\s*(\d+/\d+/QH\d+)'
+│   - Ngày: r'Ngày\s+ban\s+hành[:\s]*(\d{1,2}/\d{1,2}/\d{4})'
+│   - Điều: r'^Điều\s+(\d+):\s*(.+)$' (multiline)
+
+
+├─ BƯỚC 6: CHIA CHUNKS (CHUNKING)
+│
+│ Script: data_chunker.py
+│
+│ Mục đích:
+│   - Chia văn bản dài thành các chunk nhỏ (phù hợp với embedding model)
+│   - Chunk size chuẩn: 200-800 ký tự (hoặc 50-200 từ)
+│   - Overlap: 50-100 ký tự (để giữ context liên tiếp)
+│   - Giữ nguyên metadata của chunk
+│
+│ Tại sao chia chunks?
+│   - Embedding model có giới hạn token input (thường ~512 tokens)
+│   - 1 token ≈ 3-4 ký tự, nên 512 tokens ≈ 1500-2000 ký tự
+│   - Chunk 200-800 ký tự → giúp model "hiểu" đúng semantic
+│   - Chunk quá nhỏ → loss information
+│   - Chunk quá lớn → mất chi tiết (hard to match query)
+│
+│ Input: Full document text + metadata
+│ Output: List of chunks (mỗi chunk là dict)
+│
+│ Ví dụ:
+│   Chunk 1:
+│   {
+│       "chunk_id": "45/2024/QH15_001",
+│       "content": "Chương I: Những quy định chung\nĐiều 1: Phạm vi điều chỉnh...",
+│       "document_id": "45/2024/QH15",
+│       "chapter": 1,
+│       "article": 1,
+│       "start_char": 0,
+│       "end_char": 450
+│   }
+│
+│   Chunk 2 (với overlap):
+│   {
+│       "chunk_id": "45/2024/QH15_002",
+│       "content": "...Phạm vi điều chỉnh của Luật này...",
+│       "document_id": "45/2024/QH15",
+│       "chapter": 1,
+│       "article": 1,
+│       "start_char": 400,    ← Overlap: 50 ký tự từ chunk 1
+│       "end_char": 850
+│   }
+│
+│ Code pattern:
+│   CHUNK_SIZE = 500  # ký tự
+│   OVERLAP = 50      # ký tự
+│
+│   chunks = []
+│   start = 0
+│   while start < len(text):
+│       end = min(start + CHUNK_SIZE, len(text))
+│       chunk_text = text[start:end]
+│
+│       chunk_dict = {
+│           "chunk_id": f"{doc_id}_{len(chunks):03d}",
+│           "content": chunk_text,
+│           "document_id": doc_id,
+│           "metadata": {...}
+│       }
+│       chunks.append(chunk_dict)
+│
+│       start = end - OVERLAP  # overlap for next chunk
+
+
+├─ BƯỚC 7: LOẠI TRÙNG (DEDUPLICATION)
+│
+│ Script: data_cleaner.py (post-processing)
+│
+│ Mục đích:
+│   - Phát hiện chunks giống hệt nhau (duplicate)
+│   - Loại bỏ duplicates (giữ lại 1)
+│   - Phát hiện chunks rất tương tự (near-duplicates)
+│   - Optional: merge near-duplicates
+│
+│ Input: List of chunks
+│ Output: List of chunks (without duplicates)
+│
+│ Phương pháp:
+│   1. Hash-based (exact duplicates):
+│      - Compute SHA256 hash của từng chunk
+│      - Nếu 2 chunks có cùng hash → duplicates
+│
+│   2. Similarity-based (near-duplicates):
+│      - Compute similarity (cosine, Jaccard) giữa chunks
+│      - Nếu similarity > threshold (0.9) → near-duplicates
+│      - Có thể merge hoặc loại 1 cái
+│
+│ Code pattern:
+│   from hashlib import sha256
+│
+│   seen_hashes = set()
+│   unique_chunks = []
+│
+│   for chunk in chunks:
+│       chunk_hash = sha256(chunk['content'].encode()).hexdigest()
+│       if chunk_hash not in seen_hashes:
+│           unique_chunks.append(chunk)
+│           seen_hashes.add(chunk_hash)
+│
+│   print(f"Removed {len(chunks) - len(unique_chunks)} duplicates")
+
+
+└─ BƯỚC 8: KIỂM TRA CHẤT LƯỢNG (QUALITY CHECK)
+  
+  Script: analyze_data_quality.py
+  
+  Mục đích:
+    - Kiểm tra mỗi chunk có metadata đầy đủ không
+    - Kiểm tra độ dài chunk (phải nằm trong range)
+    - Kiểm tra encoding (phải UTF-8)
+    - Kiểm tra có ký tự lạ không
+    - Kiểm tra missing values
+  
+  Metrics:
+    - Total chunks: X
+    - Avg chunk length: Y ký tự
+    - Min/Max chunk length: Z
+    - Chunks with valid metadata: X%
+    - Encoding errors: 0
+    - Quality score: 95-100%
+  
+  Output: data_quality_report.json
+  
+  Ví dụ report:
+    {
+        "total_chunks": 50000,
+        "avg_chunk_length": 550,
+        "min_chunk_length": 100,
+        "max_chunk_length": 950,
+        "chunks_with_complete_metadata": 49500,
+        "incomplete_metadata_count": 500,
+        "encoding_errors": 0,
+        "quality_score": 0.99,
+        "warnings": [
+            "500 chunks missing article number",
+            "50 chunks over max length (950 chars)"
+        ]
+    }
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4) OUTPUT CUỐI CÙNG (FINAL OUTPUTS)
+═══════════════════════════════════════════════════════════════════════════════
+
+4.1) Tệp chunks.json
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: /data_processing/chunks.json
+Định dạng: JSON Array (list of dictionaries)
+Kích thước: 100MB - 1GB (tùy dung lượng dữ liệu gốc)
+
+Cấu trúc:
+  [
+    {
+      "chunk_id": "45/2024/QH15_001",
+      "content": "Luật Đất đai quy định...",
+      "document_id": "45/2024/QH15",
+      "document_title": "Luật Đất đai",
+      "category": "Luật",
+      "chapter": 1,
+      "article": 1,
+      "section": null,
+      "issued_date": "2024-11-15",
+      "effective_date": "2025-01-01",
+      "start_char": 0,
+      "end_char": 450,
+      "tokens_estimate": 120
+    },
+    {
+      "chunk_id": "45/2024/QH15_002",
+      "content": "...Lĩnh vực áp dụng...",
+      ...
+    },
+    ...
+  ]
+
+Công dụng:
+  - Source of truth cho tất cả chunks
+  - Được load vào RAM khi FastAPI start
+  - Dùng để trích metadata và nội dung khi trả lời
+  - Dùng để compute embeddings
+
+
+4.2) Tệp metadata.json
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: /data_processing/metadata.json
+Định dạng: JSON Object
+Kích thước: 1-10MB
+
+Cấu trúc:
+  {
+    "documents": [
+      {
+        "document_id": "45/2024/QH15",
+        "title": "Luật Đất đai",
+        "category": "Luật",
+        "issued_date": "2024-11-15",
+        "effective_date": "2025-01-01",
+        "total_chapters": 8,
+        "total_articles": 267,
+        "total_chunks": 500,
+        "keywords": ["bất động sản", "đất đai", "sở hữu"],
+        "scope": ["Toàn quốc"],
+        "source_url": "https://..."
+      },
+      ...
+    ],
+    "statistics": {
+      "total_documents": 50,
+      "total_chunks": 50000,
+      "avg_chunks_per_doc": 1000,
+      "categories": {"Luật": 10, "Nghị định": 30, "Thông tư": 10},
+      "date_range": {"from": "2020-01-01", "to": "2024-12-31"}
+    }
+  }
+
+Công dụng:
+  - Nhanh truy vấn thông tin tài liệu
+  - Dùng để filter search by document type/category
+  - Dùng để hiển thị thống kê tổng quát
+
+
+4.3) Thư mục cleaned_data/
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: /data_processing/cleaned_data/
+Nội dung: Các file text đã làm sạch (1 file = 1 document)
+Tên file: {document_id}_cleaned.txt (ví dụ: 45-2024-QH15_cleaned.txt)
+Định dạng: Plain UTF-8 text (mỗi dòng = 1 paragraph)
+
+Ví dụ nội dung file:
+  Luật Đất đai
+  Số hiệu: 45/2024/QH15
+  Ngày ban hành: 15 tháng 11 năm 2024
+  
+  Chương I: Những quy định chung
+  
+  Điều 1: Phạm vi điều chỉnh
+  Luật này quy định về thửa đất, toàn bộ tài sản gắn liền với đất...
+  
+  Điều 2: Đối tượng áp dụng
+  ...
+
+Công dụng:
+  - Giữ dữ liệu gốc đã làm sạch để backup/audit
+  - Dễ dàng inspect nội dung
+  - Support debugging nếu cần
+  - Tái tạo chunks nếu cấu hình thay đổi
+
+
+4.4) Tệp data_quality_report.json
+─────────────────────────────────────────────────────────────────────────────
+Vị trí: /data_processing/data_quality_report.json
+Định dạng: JSON
+
+Ví dụ:
+  {
+    "preprocessing_timestamp": "2024-12-04T10:30:00Z",
+    "data_version": "v1.0",
+    "input_files_processed": 50,
+    "total_chunks_generated": 50000,
+    "statistics": {
+      "avg_chunk_length": 550,
+      "median_chunk_length": 540,
+      "min_chunk_length": 100,
+      "max_chunk_length": 950,
+      "std_dev_chunk_length": 120
+    },
+    "metadata_completeness": {
+      "total_chunks": 50000,
+      "with_document_id": 50000,
+      "with_chapter": 48000,
+      "with_article": 48500,
+      "with_issued_date": 50000,
+      "completeness_score": 0.98
+    },
+    "data_quality_checks": {
+      "encoding_valid": true,
+      "no_encoding_errors": true,
+      "duplicates_removed": 200,
+      "near_duplicates_merged": 50,
+      "problematic_chunks": 0
+    },
+    "warnings": [],
+    "overall_quality_score": 0.99
+  }
+
+Công dụng:
+  - Kiểm tra chất lượng pipeline
+  - Report tổng quát cho team
+  - Phát hiện anomalies
+  - Base để optimize preprocessing steps
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5) THAM SỐ QUAN TRỌNG VÀ CÁCH ĐIỀU CHỈNH
+═══════════════════════════════════════════════════════════════════════════════
+
+5.1) Chunk Size
+─────────────────────────────────────────────────────────────────────────────
+Giá trị hiện tại: 200-800 ký tự (default ~500)
+
+Tác động:
+  - Chunk 200 ký tự: Chi tiết cao, nhưng mất context chung
+  - Chunk 500 ký tự: Cân bằng (recommended)
+  - Chunk 800 ký tự: Context tốt, nhưng embedding model cần input lớn
+
+Khi nào điều chỉnh:
+  - Nếu embedding model input limit < 512 tokens → giảm chunk size xuống 300-400
+  - Nếu muốn match queries dài → tăng chunk size lên 600-800
+  - Nếu dataset pháp luật phức tạp → tăng chunk size
+
+Formula:
+  Max chunk size ≈ (model_max_tokens × 3-4) - 100
+  Ví dụ: Model max 512 tokens → chunk size ~1500-2000 ký tự (nhưng 500-800 an toàn)
+
+
+5.2) Overlap
+─────────────────────────────────────────────────────────────────────────────
+Giá trị hiện tại: 50 ký tự
+
+Tác động:
+  - Overlap 0: Không có context liên tiếp, dễ mất thông tin ranh giới
+  - Overlap 50: Cân bằng (recommended)
+  - Overlap 100+: Quá nhiều duplicate information
+
+Quy tắc:
+  Overlap ≈ 10-20% của chunk size
+  Ví dụ: Chunk 500 → Overlap 50-100
+
+
+5.3) Deduplication Threshold
+─────────────────────────────────────────────────────────────────────────────
+Giá trị hiện tại: 0.95 (similarity score)
+
+Tác động:
+  - Threshold 0.9: Loại bỏ gần như tất cả near-duplicates
+  - Threshold 0.95: Loại bỏ duplicates rõ ràng (recommended)
+  - Threshold 0.99: Chỉ loại bỏ exact duplicates
+
+
+5.4) Metadata Extraction Confidence
+─────────────────────────────────────────────────────────────────────────────
+Để đảm bảo metadata đúng, có thể:
+  - Sử dụng pattern matching (regex)
+  - Sử dụng NER (Named Entity Recognition) model
+  - Manual review nếu dataset nhỏ
+
+Recommended: Regex patterns đủ tốt cho pháp luật Việt Nam
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6) WORKFLOW CHẠY PREPROCESSING
+═══════════════════════════════════════════════════════════════════════════════
+
+Bước chạy step-by-step:
+  
+  1. Chuẩn bị dữ liệu gốc:
+     ```
+     cp dataset_files/* data_processing/raw_input/
+     ```
+  
+  2. Chạy data cleaner (làm sạch + loại bỏ HTML):
+     ```
+     cd Data\ process
+     python data_cleaner.py
+     ```
+     Output: cleaned_data/ folder populated
+  
+  3. Chạy text normalizer:
+     ```
+     python text_normalizer.py
+     ```
+     Output: cleaned_data/ updated with normalized text
+  
+  4. Chạy metadata extractor:
+     ```
+     python metadata_extractor.py
+     ```
+     Output: metadata.json created
+  
+  5. Chạy chunker:
+     ```
+     python data_chunker.py --chunk_size 500 --overlap 50
+     ```
+     Output: chunks.json created
+  
+  6. Chạy quality analyzer:
+     ```
+     python analyze_data_quality.py
+     ```
+     Output: data_quality_report.json created
+  
+  7. Verify outputs:
+     - Check chunks.json có 50K+ chunks
+     - Check metadata.json không rỗng
+     - Check data_quality_report.json chất lượng OK (>0.95)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7) RISKSAND MITIGATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+| Risk                          | Probability | Impact | Mitigation                        |
+|-------------------------------|-------------|--------|-----------------------------------|
+| Encoding errors (CP1252/Latin)| Medium      | High   | Use chardet + explicit handling   |
+| HTML parsing mismatch         | Low         | High   | Test with BeautifulSoup + manual  |
+| Missing metadata              | Medium      | Med    | Validate + fill default values    |
+| Chunk size too small          | Low         | Low    | Adjust CHUNK_SIZE parameter      |
+| Duplicates reduce diversity   | Medium      | Med    | Deduplication script              |
+| Memory overflow (large files) | Low         | High   | Process files in batches          |
+| Metadata regex miss           | Medium      | Med    | Manual review + human validation  |
+| Inconsistent dates formats    | Medium      | Low    | Normalize via regex + dateparser  |
+
+Lưu ý quan trọng:
+  ✓ Luôn backup dữ liệu gốc trước khi xử lý
+  ✓ Test pipeline trên sample file nhỏ trước
+  ✓ Review data_quality_report để phát hiện vấn đề
+  ✓ Giữ versions (v1.0, v1.1) nếu cấu hình thay đổi
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8) TỔNG KẾT
+═══════════════════════════════════════════════════════════════════════════════
+
+Tiền xử lý dữ liệu là bước **CRITICAL** trong RAG pipeline:
+
+Input:   Dữ liệu gốc HTML/TXT (sạn, không nhất quán)
+         ↓
+Process: 8 bước transform (clean → normalize → extract → chunk → deduplicate → validate)
+         ↓
+Output:  chunks.json + metadata.json + cleaned_data/ + quality_report.json
+
+Kết quả:
+  ✓ 50K+ chunks sạch, có metadata
+  ✓ Quality score > 95%
+  ✓ Sẵn sàng cho bước embedding
+  ✓ Có audit trail (cleaned_data + quality report)
+
+Thời gian xử lý:
+  - Dataset 500MB: ~2-5 giờ (phụ thuộc CPU)
+  - Dataset 5GB: ~20-50 giờ
+
+Khuyến nghị:
+  - Chạy preprocessing offline (không phải runtime)
+  - Cache kết quả (chunks.json, embeddings.npy)
+  - Reuse chunks nếu cấu hình không thay đổi
+
+═══════════════════════════════════════════════════════════════════════════════

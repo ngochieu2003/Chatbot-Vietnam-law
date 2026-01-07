@@ -1,0 +1,280 @@
+{
+  "total_tests": 3,
+  "successful_tests": 3,
+  "failed_tests": 0,
+  "success_rate": 1.0,
+  "average_score": 0.6280555555555556,
+  "average_query_time": 6.663787921269734,
+  "total_time": 19.991363763809204,
+  "category_scores": {
+    "general": 0.6575000000000001,
+    "procedural": 0.5716666666666667,
+    "business": 0.655
+  },
+  "results": [
+    {
+      "question": "Phạm vi điều chỉnh của luật là gì?",
+      "answer": "Dựa trên các điều luật được cung cấp, phạm vi điều chỉnh của luật được quy định như sau:\n\n1.  **Theo Điều 39.13.LQ.1 (Luật)**:\n    *   Phạm vi điều chỉnh bao gồm việc thi hành các hình thức xử phạt vi phạm hành chính, các biện pháp khắc phục hậu quả quy định tại Nghị định này, được thực hiện theo quy định của Luật Xử lý vi phạm hành chính và các văn bản hướng dẫn thi hành.\n    *   Trong trường hợp áp dụng biện pháp khắc phục hậu quả buộc nộp lại các giấy phép, văn bản bị tẩy xóa, sửa chữa làm thay đổi nội dung hoặc giả mạo thông tin trong hồ sơ đề nghị cấp giấy phép, việc thực hiện theo quy định tại các khoản 1, 2, 3 và 4 Điều 85 Luật Xử lý vi phạm hành chính. Tổ chức, cá nhân vi phạm có trách nhiệm nộp trực tiếp hoặc qua đường bưu điện các giấy phép, văn bản này cho cơ quan có thẩm quyền đã cấp và gửi biên lai hoặc tài liệu chứng minh đã nộp cho người có thẩm quyền ra quyết định thi hành biện pháp khắc phục hậu quả. Người có thẩm quyền ra quyết định thi hành biện pháp khắc phục hậu quả phải thông báo bằng văn bản cho cơ quan, người có thẩm quyền đã cấp các giấy phép, văn bản đó.\n    *   (Trích dẫn: Điều 39.13.LQ.1)\n\n2.  **Theo Điều 39.13.LQ.1 (Luật)**:\n    *   Phạm vi điều chỉnh quy định các trường hợp bị cưỡng chế, các biện pháp cưỡng chế thi hành quyết định hành chính thuế, nguyên tắc, thẩm quyền, trình tự, thủ tục thực hiện các biện pháp cưỡng chế thi hành quyết định hành chính thuế đối với tổ chức, cá nhân bị cưỡng chế (trừ biện pháp dừng làm thủ tục hải quan đối với hàng hóa xuất khẩu, nhập khẩu).\n    *   Việc cưỡng chế áp dụng cho các quyết định hành chính thuế bao gồm: Quyết định xử phạt vi phạm hành chính về thuế; quyết định áp dụng biện pháp khắc phục hậu quả theo quy định của pháp luật về xử lý vi phạm hành chính; quyết định về bồi thường thiệt hại; quyết định hành chính thuế khác theo quy định của pháp luật và các thông báo ấn định thuế, thông báo tiền thuế nợ, thông báo tiền chậm nộp tiền thuế.\n    *   Đối tượng áp dụng là tổ chức, cá nhân bị cưỡng chế thi hành quyết định hành chính thuế theo quy định của Luật Quản lý thuế, cùng với cơ quan thuế và công chức thuế.\n    *   (Trích dẫn: Điều 39.13.LQ.1)",
+      "sources": [
+        {
+          "dieu": "Điều 44.12.NĐ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Nghị định",
+          "so_van_ban": "20/2008/N",
+          "ngay_ban_hanh": "2008-02-14",
+          "content_preview": "Trên cơ sở nghiên cứu và làm rõ thông tin liên quan, Vụ Pháp chế có trách nhiệm:\n1. Đối với phản ánh, kiến nghị về hành vi chậm trễ, gây phiền hà hoặc không thực hiện, thực hiện không đúng quy định hà..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "1. Việc thi hành các hình thức xử phạt vi phạm hành chính, các biện pháp khắc phục hậu quả quy định tại Nghị định này được thực hiện theo quy định của Luật Xử lý vi phạm hành chính và các văn bản hướn..."
+        },
+        {
+          "dieu": "Điều 44.7.PL.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Pháp lệnh",
+          "so_van_ban": "03/2012/UBTVQH13",
+          "ngay_ban_hanh": "2012-04-16",
+          "content_preview": "a) Trong trường hợp có quy phạm pháp luật mới được ban hành, sửa đổi, bổ sung, thay thế hoặc có quy phạm pháp luật bị bãi bỏ thuộc đề mục đã có trong chủ đề thì cơ quan thực hiện pháp điển xác định qu..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "1. Phạm vi điều chỉnh\nChương này quy định các trường hợp bị cưỡng chế, các biện pháp cưỡng chế thi hành quyết định hành chính thuế, nguyên tắc, thẩm quyền, trình tự, thủ tục thực hiện các biện pháp cư..."
+        },
+        {
+          "dieu": "Điều 44.7.PL.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Pháp lệnh",
+          "so_van_ban": "03/2012/UBTVQH13",
+          "ngay_ban_hanh": "2012-04-16",
+          "content_preview": "1. Việc cập nhật quy phạm pháp luật mới vào Bộ pháp điển được thực hiện như sau:\na) Trong trường hợp có quy phạm pháp luật mới được ban hành, sửa đổi, bổ sung, thay thế hoặc có quy phạm pháp luật bị b..."
+        }
+      ],
+      "query_time": 11.598758935928345,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "phạm vi",
+            "điều chỉnh",
+            "luật"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 0.0,
+          "matched_sources": [],
+          "unmatched_sources": [
+            "Điều 1",
+            "Điều 2"
+          ],
+          "match_ratio": 0.0,
+          "retrieved_count": 5
+        },
+        "answer_quality": {
+          "score": 1.0,
+          "has_error": false,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 10
+        },
+        "answer_length": 0.925,
+        "retrieval_quality": {
+          "avg_distance": 7.609667015075684,
+          "min_distance": 7.4598822593688965,
+          "max_distance": 7.680018424987793,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.6575000000000001
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_001",
+      "category": "general",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Quy định về thời hiệu khởi kiện là bao nhiêu năm?",
+      "answer": "Tôi không tìm thấy thông tin về thời hiệu khởi kiện trong các điều luật được cung cấp. Các điều luật này quy định về:\n*   Thời hạn nộp hồ sơ yêu cầu rà soát biện pháp chống bán phá giá, chống trợ cấp ([1] Điều 34.3.LQ.1, [2] Điều 34.3.LQ.1).\n*   Thời hiệu xử lý kỷ luật ([3] Điều 25.5.LQ.1).\n*   Quy định về việc kê biên tài sản ([4] Điều 30.3.LQ.1).\n*   Thời hạn sử dụng thẻ bảo hiểm y tế ([5] Điều 2.2.LQ.1).",
+      "sources": [
+        {
+          "dieu": "Điều 34.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "05/2017/QH14",
+          "ngay_ban_hanh": "2017-06-12",
+          "content_preview": "2. Chậm nhất 60 ngày trước khi kết thúc tròn năm kể từ ngày quyết định áp dụng biện pháp chống bán phá giá, chống trợ cấp chính thức có hiệu lực hoặc quyết định gia hạn biện pháp chống bán phá giá, ch..."
+        },
+        {
+          "dieu": "Điều 34.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "05/2017/QH14",
+          "ngay_ban_hanh": "2017-06-12",
+          "content_preview": "Nội dung:\n1. Định kỳ hàng năm trong bốn năm đầu tiên kể từ ngày quyết định áp dụng biện pháp chống bán phá giá, chống trợ cấp chính thức có hiệu lực hoặc quyết định gia hạn biện pháp chống bán phá giá..."
+        },
+        {
+          "dieu": "Điều 25.5.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "48/2019/QH14",
+          "ngay_ban_hanh": "2019-11-22",
+          "content_preview": "Ghi chú: (Điều 33 Thông tư số 75/2020/TT-BQP, có hiệu lực thi hành kể từ ngày 05/08/2020)\nNội dung:\n1. Thời hiệu xử lý kỷ luật là khoảng thời gian từ thời điểm vi phạm kỷ luật đến khi bị phát hiện vi ..."
+        },
+        {
+          "dieu": "Điều 30.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "41/2019/QH14",
+          "ngay_ban_hanh": "2019-06-14",
+          "content_preview": "Ghi chú: (Điều 29 Nghị định số 44/2020/NĐ-CP, có hiệu lực thi hành kể từ ngày 01/06/2020)\nNội dung:\n1. Việc kê biên tài sản phải thực hiện vào ban ngày, thời gian từ 08 giờ đến 17 giờ, trừ các ngày ng..."
+        },
+        {
+          "dieu": "Điều 2.2.LQ.1. Phạm vi điều chỉnh và đối tượng áp dụng",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "25/2008/QH12",
+          "ngay_ban_hanh": "2008-11-14",
+          "content_preview": "Nội dung:\n1. Từ ngày 01 tháng 01 năm 2016, thời hạn sử dụng thẻ BHYT của đối tượng quy định tại Điều 1 Thông tư này như sau:\na) Đối với đối tượng quy định tại các Khoản 1 và 2 tối đa 12 tháng tính từ ..."
+        }
+      ],
+      "query_time": 3.6948838233947754,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 0.6666666666666666,
+          "found_keywords": [
+            "thời hiệu",
+            "khởi kiện"
+          ],
+          "missing_keywords": [
+            "năm"
+          ],
+          "coverage_ratio": 0.6666666666666666
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 0.3,
+          "has_error": true,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 5
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 7.711536502838134,
+          "min_distance": 7.317502498626709,
+          "max_distance": 8.156473159790039,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.5716666666666667
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_002",
+      "category": "procedural",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Điều kiện để được cấp giấy phép kinh doanh là gì?",
+      "answer": "Dựa trên các điều luật được cung cấp, điều kiện để được cấp giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm bao gồm:\n\n*   Có một trong các loại giấy chứng nhận đăng ký kinh doanh, giấy chứng nhận đăng ký doanh nghiệp, giấy chứng nhận đầu tư theo quy định của pháp luật. (Điều 32.3.LQ.1, khoản 3a)\n*   Người đứng đầu cơ sở nhập khẩu xuất bản phẩm phải thường trú tại Việt Nam, có văn bằng do cơ sở đào tạo chuyên ngành cấp hoặc giấy chứng nhận bồi dưỡng kiến thức nghiệp vụ phát hành xuất bản phẩm do Bộ Thông tin và Truyền thông cấp. (Điều 32.3.LQ.1, khoản 3b)\n*   Có đội ngũ nhân viên đủ năng lực thẩm định nội dung sách trong trường hợp kinh doanh nhập khẩu sách. (Điều 32.3.LQ.1, khoản 3c)\n\nTôi không tìm thấy thông tin về điều kiện cấp giấy phép kinh doanh chung cho tất cả các loại hình trong các điều luật được cung cấp, mà chỉ có điều kiện cụ thể cho giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm.",
+      "sources": [
+        {
+          "dieu": "Điều 45.11.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "44/2019/QH14",
+          "ngay_ban_hanh": "2019-06-14",
+          "content_preview": "2. Thủ tục cấp giấy phép:\na) Thương nhân nộp hồ sơ trực tiếp hoặc qua đường bưu điện hoặc trực tuyến (nếu đủ điều kiện áp dụng) đến cơ quan có thẩm quyền cấp giấy phép;\nb) Đối với cấp Giấy phép sản xu..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "Khi áp dụng biện pháp cưỡng chế thu hồi giấy chứng nhận đăng ký kinh doanh hoặc giấy phép thành lập và hoạt động, giấy phép hành nghề, cơ quan Hải quan phải gửi văn bản yêu cầu cơ quan quản lý nhà nướ..."
+        },
+        {
+          "dieu": "Điều 32.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "19/2012/QH13",
+          "ngay_ban_hanh": "2012-11-20",
+          "content_preview": "3. Điều kiện cấp giấy phép hoạt động kinh doanh nhập khẩu xuất bản phẩm bao gồm:\na) Có một trong các loại giấy chứng nhận đăng ký kinh doanh, giấy chứng nhận đăng ký doanh nghiệp, giấy chứng nhận đầu ..."
+        },
+        {
+          "dieu": "Điều 3.3.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "67/2006/QH11",
+          "ngay_ban_hanh": "2006-06-29",
+          "content_preview": "8. Gia hạn giấy phép\na) Trước khi giấy phép hết hiệu lực nhưng doanh nghiệp chưa thể hoàn thành thủ tục cấp lại thì phải thực hiện thủ tục gia hạn nếu doanh nghiệp vẫn có nhu cầu tiếp tục hoạt động. M..."
+        },
+        {
+          "dieu": "Điều 39.13.LQ.1. Phạm vi điều chỉnh",
+          "chuong": "",
+          "loai_van_ban": "Luật",
+          "so_van_ban": "15/2012/QH13",
+          "ngay_ban_hanh": "2012-06-20",
+          "content_preview": "(Điều 64 Nghị định số 127/2013/NĐ-CP, có hiệu lực thi hành kể từ ngày 15/12/2013)\nKhi áp dụng biện pháp cưỡng chế thu hồi giấy chứng nhận đăng ký kinh doanh hoặc giấy phép thành lập và hoạt động, giấy..."
+        }
+      ],
+      "query_time": 4.697721004486084,
+      "metrics": {
+        "keyword_coverage": {
+          "score": 1.0,
+          "found_keywords": [
+            "điều kiện",
+            "giấy phép",
+            "kinh doanh"
+          ],
+          "missing_keywords": [],
+          "coverage_ratio": 1.0
+        },
+        "source_relevance": {
+          "score": 1.0,
+          "matched_sources": [],
+          "unmatched_sources": [],
+          "match_ratio": 1.0
+        },
+        "answer_quality": {
+          "score": 0.3,
+          "has_error": true,
+          "has_complete_sentences": true,
+          "has_content": true,
+          "sentence_count": 4
+        },
+        "answer_length": 1.0,
+        "retrieval_quality": {
+          "avg_distance": 8.375989055633545,
+          "min_distance": 7.927609920501709,
+          "max_distance": 8.594100952148438,
+          "quality_score": 0.1,
+          "retrieved_count": 5
+        },
+        "overall_score": 0.655
+      },
+      "success": true,
+      "error": null,
+      "test_id": "test_003",
+      "category": "business",
+      "difficulty": "medium"
+    }
+  ],
+  "timestamp": "2026-01-06T10:15:10.057228"
+}

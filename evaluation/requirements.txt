@@ -1,0 +1,18 @@
+# Requirements cho Evaluation Module
+# 
+# Lưu ý: Các dependencies cho RAG System nằm trong RAG/requirements.txt
+# Cần cài đặt dependencies của RAG System trước
+
+# Core dependencies (đã có trong RAG/requirements.txt)
+# - numpy
+# - faiss-cpu hoặc faiss-gpu
+# - sentence-transformers
+# - google-generativeai (cho Gemini)
+
+# Evaluation specific
+# (Không cần thêm dependencies mới, sử dụng các thư viện có sẵn)
+
+# Optional: để tạo reports đẹp hơn
+# matplotlib>=3.5.0  # Cho visualization (optional)
+# pandas>=1.5.0      # Cho data analysis (optional)
+

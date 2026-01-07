@@ -1,0 +1,9 @@
+{
+  "index_type": "flat",
+  "num_vectors": 241451,
+  "dimension": 384,
+  "index_class": "IndexFlatL2",
+  "embeddings_path": "/Users/hieunguyen/Documents/Hieu/chatbot_rag/Embeddings/data/embeddings/embeddings.npy",
+  "index_size_mb": 353.68803119659424,
+  "created_at": "2025-11-23T19:07:08.819898"
+}

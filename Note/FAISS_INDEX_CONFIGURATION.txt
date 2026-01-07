@@ -1,0 +1,361 @@
+═══════════════════════════════════════════════════════════════════════════════
+FAISS INDEX CONFIGURATION - DỰ ÁN HIỆN TẠI
+═══════════════════════════════════════════════════════════════════════════════
+
+1) LOẠI FAISS INDEX ĐANG DÙNG
+─────────────────────────────────────────────────────────────────────────────
+
+📌 MẶC ĐỊNH: IndexFlatL2 (flat index)
+
+Tệp cấu hình: VectorDB/scripts/build_index.py (line 25)
+  ```python
+  index_type: str = 'flat'  # Default parameter
+  ```
+
+HỖ TRỢ 3 LOẠI INDEX:
+  1. 'flat'   → IndexFlatL2 (default)
+  2. 'ivf'    → IndexIVFFlat (tuned nlist)
+  3. 'hnsw'   → IndexHNSWFlat (M=32)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2) CHI TIẾT MỖI LOẠI INDEX
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─ LOẠI 1: IndexFlatL2 (FLAT) - MẶCĐỊNH
+│
+│ Mô tả:
+│   - Brute-force search: tính L2 distance từ query tới MỌI vector
+│   - Chính xác 100% (không approximation)
+│   - Không cần training
+│
+│ Code hiện tại (build_index.py, line 61-63):
+│   ```python
+│   if index_type == 'flat':
+│       index = faiss.IndexFlatL2(dimension)
+│       print("  - Sử dụng IndexFlatL2 (chính xác 100%)")
+│   ```
+│
+│ Ưu điểm:
+│   ✓ Chính xác tuyệt đối (100%)
+│   ✓ Đơn giản, không cần tuning
+│   ✓ Không cần training phase
+│   ✓ Phù hợp dataset nhỏ-trung bình (< 1M vectors)
+│
+│ Nhược điểm:
+│   ✗ Chậm: O(N) complexity (phải scan hết N vectors)
+│   ✗ Tốn RAM: ~1GB per 1M vectors (float32)
+│   ✗ Không scalable cho dataset > 10M
+│
+│ Thích hợp cho:
+│   - Dataset < 1M chunks (khuyến nghị)
+│   - Dự án chatbot pháp luật (estimated 50K-500K chunks)
+│   - Prototype/MVP
+│   - Offline search (không critical latency)
+│
+│ Search latency:
+│   - 50K chunks, 384-dim embedding, CPU: ~50-100ms
+│   - 500K chunks, CPU: ~500-1000ms
+│
+│ RAM usage:
+│   - 50K vectors × 384 dim × 4 bytes = ~76 MB (embeddings)
+│   - Index overhead: ~1-2 MB
+│   - Total: ~80 MB
+
+
+├─ LOẠI 2: IndexIVFFlat (IVF)
+│
+│ Mô tả:
+│   - Inverted File (IVF): chia vectors thành Nclusters (clusters/buckets)
+│   - Search: tìm Nprobe clusters gần query, sau đó scan trong clusters đó
+│   - Xấp xỉ (approximate search), nhanh hơn Flat
+│
+│ Code hiện tại (build_index.py, line 66-74):
+│   ```python
+│   elif index_type == 'ivf':
+│       if nlist is None:
+│           nlist = int(np.sqrt(num_vectors))
+│           nlist = min(max(nlist, 10), 1000)  # Giới hạn 10-1000
+│       
+│       quantizer = faiss.IndexFlatL2(dimension)
+│       index = faiss.IndexIVFFlat(quantizer, dimension, nlist)
+│       index.train(embeddings)  # Training phase (training_vectors = all embeddings)
+│   ```
+│
+│ Tham số:
+│   - nlist: Số clusters (default = sqrt(num_vectors))
+│     ├─ Ví dụ: 50K vectors → nlist ≈ 224
+│     ├─ Ví dụ: 500K vectors → nlist ≈ 707 (capped at 1000)
+│     └─ nlist cho dataset này: 100-300 (tuned empirically)
+│   - nprobe: Số clusters cần scan (runtime, default = 1)
+│     ├─ nprobe = 1: Chỉ scan cluster gần nhất (nhanh, có thể miss)
+│     ├─ nprobe = 10: Scan 10 clusters gần nhất (balanced)
+│     └─ nprobe = nlist: Scan hết (giống Flat, chậm)
+│
+│ Ưu điểm:
+│   ✓ Nhanh hơn Flat (10-100x tuỳ nprobe)
+│   ✓ Bộ nhớ tương tự Flat (nprobe ~1)
+│   ✓ Scalable tới 10M+ vectors
+│
+│ Nhược điểm:
+│   ✗ Xấp xỉ: có thể miss một số results (phụ thuộc nprobe)
+│   ✗ Cần training phase (training_vectors = all embeddings)
+│   ✗ Tuning nprobe phức tạp (trade-off accuracy ↔ speed)
+│
+│ Thích hợp cho:
+│   - Dataset 1M - 100M vectors
+│   - Production (cần latency < 100ms)
+│   - Cloud services (cost-sensitive, favor speed over accuracy)
+│
+│ Latency (typical):
+│   - 50K chunks, nprobe=1: ~5-10ms
+│   - 50K chunks, nprobe=10: ~20-50ms
+│   - 500K chunks, nprobe=1: ~10-20ms
+│   - 500K chunks, nprobe=10: ~50-100ms
+│
+│ RAM usage:
+│   - Embeddings: ~76 MB (50K)
+│   - IVF structure: ~50-100 MB overhead
+│   - Total: ~130-180 MB
+
+
+└─ LOẠI 3: IndexHNSWFlat (HNSW)
+  
+  Mô tả:
+    - Hierarchical Navigable Small World (HNSW): graph-based search
+    - Mỗi vector là node, edges liên kết neighbors (M connections/node)
+    - Search: traverse graph từ entry point tới query-nearest
+    - Xấp xỉ, nhưng thường chính xác hơn IVF
+  
+  Code hiện tại (build_index.py, line 80-86):
+    ```python
+    elif index_type == 'hnsw':
+        M = 32  # Số connections mỗi node
+        print(f"  - Sử dụng IndexHNSW với M={M}")
+        index = faiss.IndexHNSWFlat(dimension, M)
+    ```
+  
+  Tham số:
+    - M: Số connections mỗi node (default 32)
+      ├─ M=16: Bộ nhớ thấp, chật hơn
+      ├─ M=32: Balanced (default)
+      └─ M=64: Bộ nhớ cao, nhanh hơn
+    - ef_search: Runtime parameter (default 100, capped at M*layer_count)
+  
+  Ưu điểm:
+    ✓ Nhanh nhất (< 10ms cho 1M vectors)
+    ✓ Bộ nhớ vừa phải (overhead M * num_vectors * 4 bytes)
+    ✓ Không cần training
+    ✓ Xấp xỉ tốt (recall > 99% với tuning)
+  
+  Nhược điểm:
+    ✗ Tốn bộ nhớ hơn Flat/IVF (M * 4 * N bytes)
+    ✗ Tuning M phức tạp
+    ✗ Không phù hợp cạnh tranh với IVF khi RAM bị ràng buộc
+  
+  Thích hợp cho:
+    - Production high-throughput (latency < 10ms)
+    - Large-scale deployment (milliards of vectors)
+    - Memory not a constraint
+    - High recall requirement
+  
+  Latency (typical):
+    - 50K chunks, ef_search=100: ~2-5ms
+    - 500K chunks, ef_search=100: ~5-10ms
+    - 10M chunks, ef_search=100: ~10-20ms
+  
+  RAM usage:
+    - Embeddings: ~76 MB (50K)
+    - HNSW overhead: M × num_vectors × 4 bytes = 32 × 50K × 4 = ~6.4 MB
+    - Total: ~85 MB
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3) SO SÁNH 3 LOẠI INDEX
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────┬──────────────┬──────────┬──────────┬──────────┬───────────┐
+│ Index Type  │ Accuracy     │ Latency  │ Memory   │ Training │ Tuning    │
+├─────────────┼──────────────┼──────────┼──────────┼──────────┼───────────┤
+│ Flat (L2)   │ 100%         │ 100ms    │ 80MB     │ None     │ None      │
+│ IVF         │ ~98% (nprobe)│ 20ms     │ 130MB    │ Required │ nprobe    │
+│ HNSW        │ ~99%         │ 3ms      │ 85MB     │ None     │ M, ef_s   │
+└─────────────┴──────────────┴──────────┴──────────┴──────────┴───────────┘
+
+Dataset: 50K chunks × 384-dim embeddings (CPU, single-thread)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4) KHUYẾN NGHỊ CHO DỰÁN HIỆN TẠI (CHATBOT PHÁP LUẬT)
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 Ước lượng dataset:
+   - Chunks: 50K - 500K (tuỳ số văn bản pháp luật)
+   - Embedding dim: 384 (sentence-transformer)
+   - RAM khả dụng: ~2-8GB (typical server)
+
+✅ KHUYẾN NGHỊ CHO MỖI STAGE:
+
+1️⃣ Prototype / MVP (hiện tại):
+   - Chọn: IndexFlatL2 (mặc định hiện tại)
+   - Lý do:
+     ├─ Dataset nhỏ (< 1M chunks)
+     ├─ Tính chính xác 100% quan trọng (pháp luật)
+     ├─ Không critical latency (< 1s OK)
+     └─ Dễ debug (không có approximation)
+   - Lệnh chạy:
+     ```bash
+     python VectorDB/scripts/build_index.py \
+       --embeddings Embeddings/data/embeddings.npy \
+       --chunks "data_processing/chunks.json" \
+       --output VectorDB/data/index/faiss_index.bin \
+       --index_type flat
+     ```
+
+2️⃣ Production (khi dataset > 100K chunks hoặc latency critical):
+   - Chọn: IndexIVFFlat
+   - Lý do:
+     ├─ Balanced speed/memory/accuracy
+     ├─ Nprobe tunable (can adjust accuracy trade-off)
+     ├─ Scalable tới milliards
+     └─ Phổ biến trong production
+   - Tham số:
+     ├─ nlist = sqrt(num_chunks) = sqrt(100K) = 316
+     ├─ nprobe = 20 (start, tune based on recall requirement)
+     └─ Recall target: > 95% (pháp luật không cần 100%)
+   - Lệnh chạy:
+     ```bash
+     python VectorDB/scripts/build_index.py \
+       --embeddings Embeddings/data/embeddings.npy \
+       --chunks "data_processing/chunks.json" \
+       --output VectorDB/data/index/faiss_index.bin \
+       --index_type ivf \
+       --nlist 316
+     ```
+
+3️⃣ High-Scale / High-Performance (khi > 1M chunks):
+   - Chọn: IndexHNSW (nếu memory OK) hoặc IVF (nếu memory tight)
+   - Tham số HNSW:
+     ├─ M = 32 (default, balanced)
+     ├─ ef_search = 50-100 (tunable)
+     └─ Recall target: > 98%
+   - Lệnh chạy:
+     ```bash
+     python VectorDB/scripts/build_index.py \
+       --embeddings Embeddings/data/embeddings.npy \
+       --chunks "data_processing/chunks.json" \
+       --output VectorDB/data/index/faiss_index.bin \
+       --index_type hnsw
+     ```
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5) CÁCH KIỂM TRA INDEX ĐANG DÙNG
+═══════════════════════════════════════════════════════════════════════════════
+
+Bạn có thể kiểm tra index đang load bằng code:
+
+```python
+import faiss
+index = faiss.read_index("VectorDB/data/index/faiss_index.bin")
+print(type(index).__name__)  # Output: IndexFlatL2, IndexIVFFlat, hoặc IndexHNSWFlat
+print(f"Total vectors: {index.ntotal}")
+print(f"Dimension: {index.d}")
+```
+
+Hoặc via Python REPL:
+```bash
+cd chatbot_rag
+python3 -c "
+import faiss
+index = faiss.read_index('VectorDB/data/index/faiss_index.bin')
+print(f'Index type: {type(index).__name__}')
+print(f'Vectors: {index.ntotal}')
+print(f'Dimension: {index.d}')
+"
+```
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6) RUNTIME PARAMETERS (TUNING)
+═══════════════════════════════════════════════════════════════════════════════
+
+Sau khi load index, bạn có thể tuning parameters lúc runtime:
+
+┌─ Cho IndexFlatL2:
+│  - Không có runtime parameters (brute-force luôn)
+│
+├─ Cho IndexIVFFlat:
+│  - nprobe (default = 1)
+│    ```python
+│    index.nprobe = 20  # Scan top-20 clusters
+│    ```
+│  - Tăng nprobe → chậm hơn nhưng chính xác hơn
+│  - Khuyến nghị: nprobe = 5-10% của nlist
+│
+└─ Cho IndexHNSW:
+   - ef (default = 100)
+     ```python
+     # Không phải instance variable, set via search params
+     # Hoặc dùng index.hnsw.ef để set
+     ```
+   - Tăng ef → chậm hơn nhưng chính xác hơn
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7) NƠICẤU HÌNH HIỆN TẠI TRONG CÓ
+═══════════════════════════════════════════════════════════════════════════════
+
+Build script:
+  📄 VectorDB/scripts/build_index.py (line 21-87)
+     - Function: build_faiss_index()
+     - Params: index_type='flat', nlist=None
+
+Load script:
+  📄 VectorDB/models/faiss_manager.py (line 40-60)
+     - Function: load_index()
+     - Loads từ file, auto-detect type
+
+Integration:
+  📄 RAG/models/rag_system.py
+     - Khởi tạo FAISSManager và load index
+     - Gọi search() method
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8) CẬP NHẬT LỰA CHỌN INDEX
+═══════════════════════════════════════════════════════════════════════════════
+
+Nếu muốn đổi sang IVF hoặc HNSW, chỉ cần:
+
+1. Rebuild index với type mới:
+   ```bash
+   python VectorDB/scripts/build_index.py --index_type ivf --nlist 316
+   ```
+
+2. FAISSManager sẽ tự động detect type (không cần code change)
+
+3. RAGSystem sẽ load và search như bình thường
+
+🎯 Không cần thay đổi code, chỉ cần rebuild index!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9) TÓM KẾT
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Dự án hiện tại: IndexFlatL2 (default)
+   - Phù hợp cho MVP/prototype
+   - Chính xác 100%, đơn giản, không tối ưu
+   - Thích hợp dataset < 1M chunks
+
+🎯 Khuyến nghị nếu cần nâng cấp:
+   - 100K-1M chunks: IndexIVFFlat (nlist = sqrt(N), nprobe = 5-10)
+   - > 1M chunks: IndexHNSWFlat (M = 32)
+
+💡 Lợi thế pháp luật:
+   - Chính xác là ưu tiên (recall = 100% tốt hơn 98%)
+   - Flat index là safe choice cho lĩnh vực này
+   - Tuning sau nếu latency become bottleneck
+
+═══════════════════════════════════════════════════════════════════════════════

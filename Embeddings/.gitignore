@@ -1,0 +1,32 @@
+# Ignore embeddings files (quá lớn để commit)
+data/embeddings/*.npy
+data/mappings/*.json
+data/metadata/*.json
+
+# Python
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model cache (optional - uncomment nếu không muốn cache models)
+# .cache/
+# models/
+

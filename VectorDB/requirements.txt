@@ -1,0 +1,22 @@
+# Requirements cho VectorDB Module
+# 
+# LƯU Ý: FAISS nên được cài qua conda thay vì pip:
+#   conda install -c conda-forge faiss-cpu
+#   hoặc
+#   conda install -c pytorch faiss-cpu
+#
+# Nếu không dùng conda, cần cài SWIG trước:
+#   macOS: brew install swig
+#   Ubuntu: sudo apt-get install swig
+
+# Vector Database
+# faiss-cpu>=1.7.4  # Comment lại, cài qua conda thay vì pip
+# faiss-gpu>=1.7.4  # Uncomment nếu có GPU và CUDA
+
+# Core dependencies
+numpy>=1.24.0,<2.0.0
+sentence-transformers>=2.2.0
+
+# Utilities
+tqdm>=4.65.0
+

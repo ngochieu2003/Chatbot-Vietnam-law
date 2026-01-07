@@ -1,0 +1,204 @@
+Project: Chatbot-RAG (Chatbot Pháp Luật Việt Nam)
+Path: /Users/hieunguyen/Documents/Hieu/chatbot_rag
+Generated: 2025-11-28
+
+1) Mục tiêu dự án
+- Xây dựng chatbot hỏi đáp về pháp luật Việt Nam dùng kiến trúc RAG (Retrieval-Augmented Generation).
+- Lấy ngữ liệu từ các văn bản luật đã được chunk/embedding và lưu trong FAISS, khi có truy vấn sẽ tìm các chunk liên quan rồi gọi LLM (Google Gemini) để sinh câu trả lời dựa trên các nguồn đó.
+
+2) Cấu trúc thư mục chính (tóm tắt)
+- `App/` - Frontend + API server và hướng dẫn chạy.
+  - `api/fastapi_app.py` : FastAPI backend, khởi tạo `RAGSystem`, endpoints `/health`, `/chat`, `/search`.
+  - `frontend/streamlit_app.py` : Giao diện người dùng Streamlit, gọi backend trên `http://localhost:8000`.
+  - `test_api.py` : Script test endpoints (sử dụng `requests`).
+
+- `RAG/` - Core RAG implementation và tiện ích LLM
+  - `models/rag_system.py` : Lớp `RAGSystem` orchestrator (search, prompt, generate, retry, fallback). Đây là nơi chứa logic tìm kiếm chunks, format prompt, gọi LLM, retry truncate.
+  - `utils/llm_utils.py` : Adapter cho các LLM (Gemini, OpenAI, Ollama, Claude). `generate_response_gemini()` chịu trách nhiệm gọi Google Generative AI SDK, đã được harden để tránh lỗi quick-accessor.
+  - `utils/gemini_logger.py` (nếu tồn) : JSONL logger cho các phản hồi Gemini (cần kiểm tra log folder).
+
+- `VectorDB/` - Mã liên quan FAISS / embeddings
+  - `models/faiss_manager.py` (FAISSManager) : load index, search_by_text, trả về chunks và distances.
+  - `data/` : (nếu có) dữ liệu trợ giúp, mappings.
+
+- `data_processing/` - Data cleaning, chunker, metadata
+  - `data_chunker.py`, `metadata_extractor.py`, `text_normalizer.py` etc. Chứa các script tiền xử lý văn bản, tạo `chunks.json`, `metadata.json`.
+
+- `Embeddings/`, `RAG/models/` và `Dataset/` - các dữ liệu bổ trợ, mapping, cleaned data, embeddings lưu trữ.
+
+3) Luồng công việc (workflow tổng quát)
+- Bước 0: Cấu hình môi trường
+  - Tạo file `.env` (hoặc export env vars): `GEMINI_API_KEY` (hoặc `GOOGLE_API_KEY`), `LLM_PROVIDER` (mặc định 'gemini'), `LLM_MODEL` (ví dụ `models/gemini-2.5-flash`).
+  - Cài dependencies: xem `App/requirements.txt`, `RAG/requirements.txt`, `Embeddings/requirements.txt`.
+
+- Bước 1: Chuẩn bị dữ liệu (một lần hoặc khi cập nhật dữ liệu)
+  - Mục tiêu: biến kho văn bản pháp luật thô (HTML, PDF, TXT) thành các đơn vị (chunk) có thể tìm kiếm nhanh bằng vector search, kèm metadata để có nguồn gốc (provenance) và khả năng trích dẫn.
+
+  - Cấu trúc dataset (các file/objects chính)
+   1) `raw` (hoặc `Dataset/`): tệp văn bản gốc (HTML/PDF/TXT). Mỗi văn bản gốc có `document_id`, tiêu đề, và nội dung thô.
+   2) `cleaned_data/`: các tệp văn bản đã làm sạch (plain text) — giữ `document_id` để trace back.
+   3) `chunks.json`: danh sách các chunk (mỗi chunk là một đoạn văn ngắn được cắt từ văn bản). Mẫu một entry:
+
+```json
+{
+  "id": "chunk-0001",
+  "content": "Nội dung đoạn văn ...",
+  "metadata": {
+   "document_id": "doc-0123",
+   "dieu": "Điều 39.13",
+   "chuong": "Chương II",
+   "loai_van_ban": "Luật",
+   "so_van_ban": "15/2012/QH13",
+   "ngay_ban_hanh": "2012-06-20",
+   "start_offset": 1024,
+   "end_offset": 1200
+  }
+}
+```
+
+   4) `embeddings.npy` (hoặc folder `Embeddings/data/`): ma trận embeddings tương ứng với mỗi chunk (float32), hoặc file JSON mapping `chunk_id -> embedding vector`.
+   5) `chunk_mapping.json`: mapping giữa `chunk_id` và chỉ số trong embedding matrix / FAISS index (giúp lookup nhanh khi trả về sources).
+
+  - Các bước xử lý dữ liệu (chi tiết & lý do)
+   1) Ingest (nhập liệu): thu thập các văn bản gốc (HTML/PDF/TXT) vào `Dataset/`.
+     - Mục đích: tập trung nguồn dữ liệu, giữ tài liệu gốc để audit.
+
+   2) Clean (làm sạch): loại bỏ HTML tags, script/style, header/footer không cần thiết; chuẩn hoá encoding (UTF-8), sửa lỗi ký tự, chuẩn hoá dấu cách và xuống dòng.
+     - Tại sao: văn bản gốc thường chứa markup, ký tự thừa, hoặc định dạng gây nhiễu cho bước tokenization và chunking. Việc làm sạch giúp embedding và retrieval ổn định hơn.
+
+   3) Normalize (chuẩn hoá ngôn ngữ): quy chuẩn dấu câu, chuẩn hoá tên viết tắt, chuyển các dạng ngày tháng về format ISO (`YYYY-MM-DD`), chuẩn hoá chữ hoa/chữ thường nếu cần.
+     - Tại sao: giúp trích xuất metadata chính xác (ví dụ ngày ban hành) và giảm biến thể vô nghĩa trong nội dung khi tạo embeddings.
+
+   4) Metadata extraction (trích metadata): parse header document để lấy `so_van_ban`, `ngay_ban_hanh`, `loai_van_ban`, `dieu`, `chuong`, `document_id`.
+     - Tại sao: metadata cho phép trả kết quả có nguồn, giúp người dùng kiểm tra tính chính xác và pháp lý; cũng dùng để lọc/sort kết quả.
+
+   5) Chunking (chia đoạn): chia mỗi văn bản đã sạch thành các chunk có kích thước hợp lý (theo ký tự hoặc theo token), thường khoảng 200–800 ký tự với overlap ~50–200 ký tự.
+     - Tại sao: embeddings hoạt động trên đoạn ngắn — nếu chunk quá dài sẽ làm mờ ý chính và dễ dẫn tới vượt giới hạn token khi làm prompt; overlap giữ ngữ cảnh khi trả kết quả.
+
+   6) Deduplication & QA: loại bỏ chunk trùng lặp, kiểm tra các chunk rỗng hoặc gây lỗi.
+     - Tại sao: tránh lặp nội dung trong kết quả search và giảm kích thước index.
+
+   7) Compute embeddings: dùng model sentence-transformer hoặc gọi API embeddings để chuyển mỗi chunk thành một vector (ví dụ 384-d dim).
+     - Tại sao: chuyển văn bản sang không gian vector để thực hiện similarity search (k-NN) trong FAISS.
+
+   8) Build index (FAISS): nạp tất cả embeddings vào FAISS index (flat, IVFFlat, HNSW, ... tùy nhu cầu), lưu `faiss_index.bin`.
+     - Tại sao: FAISS cung cấp truy vấn similarity nhanh cho hàng trăm nghìn vectors; chọn cấu hình index phù hợp giữa tốc độ và dung lượng bộ nhớ.
+
+   9) Save mapping & artifacts: lưu `chunk_mapping.json`, `embeddings.npy`, `chunks.json` và các bản backup.
+     - Tại sao: mapping cần để khi FAISS trả chỉ số (idx) có thể tra ngược về `chunk_id` và metadata để trả về nguồn.
+
+  10) Validate / Smoke tests: chạy vài truy vấn mẫu và kiểm tra kết quả search (relevance), kiểm tra max token khi tạo prompt.
+     - Tại sao: đảm bảo pipeline không làm hỏng dữ liệu và RAG cho kết quả hữu dụng.
+
+  - Lưu ý về kích thước chunk và token
+   - Chọn chunk size và overlap là trade-off: chunk lớn giữ nhiều ngữ cảnh nhưng tăng prompt size; chunk nhỏ giảm bớt token nhưng có thể mất ý chính. Với LLM trả lời dài (max_tokens lớn), cần cân bằng để prompt + output không vượt giới hạn token của model.
+
+  - Rủi ro liên quan dataset
+   - Encoding/Unicode errors: dẫn tới mất chữ hoặc ký tự lạ.
+   - Metadata không chuẩn/thiếu: khiến nguồn trả về thiếu thông tin trích dẫn.
+   - Duplicates: kết quả trùng lặp gây xáo trộn UX.
+   - Legal updates: văn bản pháp luật thay đổi theo thời gian — cần có quy trình cập nhật và versioning.
+
+
+- Bước 2: Khởi chạy backend (FastAPI)
+  - Từ `App/`:
+    - `uvicorn api.fastapi_app:app --reload --host 0.0.0.0 --port 8000`
+  - Khi khởi tạo, `fastapi_app` gọi `RAGSystem(...)` và `rag_system.load(index_path, chunks_path, mapping_path)` để load index và chunks vào RAM.
+
+- Bước 3: Giao diện / Kiểm thử
+  - Streamlit frontend: `cd App && streamlit run frontend/streamlit_app.py`.
+  - Test script: `python3 App/test_api.py` (gọi `/health`, `/search`, `/chat`).
+
+- Bước 4: RAG runtime request handling (chi tiết kỹ thuật)
+  - Khi endpoint `/chat` nhận `query`:
+    1) `RAGSystem.search()` gọi FAISSManager.search_by_text(query, top_k) để lấy top-k chunks và distances.
+    2) `RAGSystem._format_context()` gom các chunks vào template prompt.
+    3) `RAGSystem._generate_response()` gọi `generate_response_gemini()` (trong `RAG/utils/llm_utils.py`) để gửi prompt đến Google Gemini.
+    4) Nếu Gemini trả về lỗi hoặc cấu trúc không như mong đợi (ví dụ candidate.finish_reason == MAX_TOKENS và parts rỗng), hệ thống có cơ chế retry:
+       - (đã triển khai) Multi-level retry server-side: giảm `top_k` theo sequence và truncate nội dung mỗi chunk theo các độ dài [800,600,400,200], giảm temperature nhẹ, thử lại; nếu tất cả thất bại trả fallback answer (tóm tắt chunks + thông báo lỗi).
+    5) Trả về `answer`, `sources`, metadata cho client.
+
+4) Những kỹ thuật & thư viện chính đang sử dụng
+- FAISS (VectorDB) để search embedding nhanh.
+- Sentence-transformers hoặc model paraphrase cho embedding (ví dụ `paraphrase-multilingual-MiniLM-L12-v2`).
+- Google Generative AI SDK (`google.generativeai`) để gọi Google Gemini.
+- FastAPI + Uvicorn cho backend API.
+- Streamlit cho frontend UI.
+- python-dotenv để load `.env`.
+- Requests cho script test (`App/test_api.py`).
+- Pydantic (BaseModel) cho định nghĩa request/response models trong FastAPI.
+
+5) Các tệp cấu hình & nơi đặt khóa (secrets)
+- `.env` (nhiều nơi): có thể đặt `GEMINI_API_KEY` hoặc `GOOGLE_API_KEY`, `LLM_PROVIDER`, `LLM_MODEL`.
+- Lưu ý: không commit file `.env` có chứa API keys vào git.
+
+6) Các lệnh thường chạy / quick-start
+- Install deps (ví dụ): `pip install -r App/requirements.txt` (và các requirements cho RAG/Embeddings nếu cần).
+- Start backend:
+  ```bash
+  cd App
+  uvicorn api.fastapi_app:app --reload --host 0.0.0.0 --port 8000
+  ```
+- Start frontend:
+  ```bash
+  cd App
+  streamlit run frontend/streamlit_app.py
+  ```
+- Run tests
+  ```bash
+  python3 App/test_api.py
+  ```
+
+7) Rủi ro khi chạy và cách giảm thiểu
+- 1) LLM trả response không có `parts` (finish_reason = MAX_TOKENS) hoặc trả shape bất thường:
+  - Nguyên nhân: prompt quá dài (nhiều chunk/đoạn văn), tổng token vượt giới hạn model (prompt + output), hoặc model ngắt do safety/cut.
+  - Hệ quả: quick-accessor `response.text` có thể raise ValueError với SDK; caller nhận lỗi hoặc fallback.
+  - Giải pháp trong dự án: hardened `generate_response_gemini()` với guarded access, multi-level retry server-side (giảm top_k, truncate chunk content), tăng `max_output_tokens` mặc định client-side (Streamlit), và trả fallback tóm tắt + log chi tiết.
+
+- 2) Chi phí và quota khi gọi Gemini/LLM:
+  - Việc gọi model lớn (gemini-2.5-flash/pro) với `max_tokens` lớn gây chi phí cao.
+  - Giải pháp: cân bằng model/mode, limit `max_tokens`, cache các câu trả lời phổ biến, sử dụng model nhỏ hơn khi có thể.
+
+- 3) Hiệu năng & bộ nhớ:
+  - FAISS index lớn (hàng trăm nghìn vectors) tiêu tốn RAM khi load toàn bộ; server cần cấu hình đủ bộ nhớ.
+  - Giải pháp: dùng on-disk index, sharding, hoặc dịch vụ host vector DB (PGVector, Weaviate) khi scale.
+
+- 4) Bảo mật & dữ liệu nhạy cảm:
+  - Không ghi API keys vào repo; hạn chế logging PII; kiểm soát quyền truy cập server.
+
+- 5) Độ trễ và UX:
+  - RAG có độ trễ do search + LLM call. Xử lý bằng spinner UI, timeout hợp lý, và trả fallback nội bộ để người dùng không chờ quá lâu.
+
+8) Kiểm thử và quan sát (observability)
+- Logs: `uvicorn` stdout + prints trong `RAG/models/rag_system.py` và `RAG/utils/llm_utils.py` (nơi in errors/finish_reason).
+- Gemini JSONL log (nếu đã thêm `RAG/utils/gemini_logger.py`) lưu các response/candidates cho phân tích.
+- Cân nhắc thêm: structured logging (JSON), log rotation, metrics (Prometheus), tracing (OpenTelemetry) cho production.
+
+9) Các file quan trọng để xem / chỉnh khi debug
+- `RAG/models/rag_system.py` — flow chính, retry logic, prompt formatting, fallback content.
+- `RAG/utils/llm_utils.py` — adapter Gemini, safe access, model selection.
+- `App/api/fastapi_app.py` — endpoint definitions, RAGSystem init and load paths.
+- `App/frontend/streamlit_app.py` — client defaults và slider `max_tokens`/`top_k`.
+- `data_processing/` — chunking pipeline, `chunks.json` chứa data đã chia.
+- `VectorDB/models/faiss_manager.py` — cách load/search index.
+
+10) Các đề xuất ngắn hạn (actionable)
+- A. Giữ `top_k` mặc định client (Streamlit) = 3 để giảm prompt size; hoặc hiển thị cảnh báo nếu người dùng chọn `top_k` > 5.
+- B. Giữ multi-level retry server-side (đã triển khai) và mở rộng nếu cần (thêm truncation/summarization bằng model rẻ hơn).
+- C. Thêm JSONL logging cho mỗi retry attempt (top_k, truncate_len, finish_reason) để dễ phân tích.
+- D. Thêm health checks và metrics (response times, rate of MAX_TOKENS) để theo dõi.
+
+11) Các bước dài hạn
+- 1) Tối ưu prompt template (rút gọn, hệ thống prompt ngắn gọn).
+- 2) Thực hiện chunk summarization preprocessing để giảm kích thước context mà vẫn giữ ý chính.
+- 3) Triển khai caching câu trả lời/simhash cho các câu hỏi trùng lặp để giảm chi phí.
+- 4) Nâng cấp môi trường Python nếu SDK khuyến nghị (ví dụ >= 3.10) và kiểm tra dependency compatibility.
+
+12) Nơi lưu log & artifacts
+- Index: `VectorDB/data/index/faiss_index.bin`
+- Chunks: `data_processing/chunks.json`
+- Mapping: `Embeddings/data/mappings/chunk_mapping.json` (tùy cấu trúc)
+- Logs: `uvicorn` console; `RAG/utils/logs/` (nếu tồn) cho gemini responses.
+
+---
+Ghi chú: Báo cáo này dựa trên nội dung file và cấu trúc được cung cấp trong workspace tại thời điểm tạo. Nếu cần, tôi có thể tạo thêm phiên bản markdown (`PROJECT_SUMMARY.md`) hoặc tách phần hoạt động thành checklist dùng cho báo cáo management (ví dụ: README_DEPLOY.md).

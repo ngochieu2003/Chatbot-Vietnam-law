@@ -1,0 +1,18 @@
+# Requirements cho App (API + Frontend)
+# 
+# Lưu ý: Các dependencies cho RAG System nằm trong RAG/requirements.txt
+
+# API Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# Frontend (giữ 1.12 để tương thích Python 3.9)
+streamlit==1.12.0
+
+# HTTP Client
+requests>=2.31.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+

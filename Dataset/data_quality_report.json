@@ -1,0 +1,61 @@
+{
+  "total_files": 304,
+  "html_files": 303,
+  "total_size": 4836904,
+  "content_analysis": {
+    "avg_file_size_chars": 386829.8,
+    "estimated_total_chars": 117209429.39999999,
+    "avg_dieu_per_file": 134.2,
+    "estimated_total_dieu": 40662.6,
+    "avg_chuong_per_file": 16.8,
+    "estimated_total_chuong": 5090.400000000001,
+    "avg_noi_dung_per_file": 134.2,
+    "estimated_total_noi_dung": 40662.6,
+    "has_structured_content": true,
+    "has_dieu": false,
+    "has_chuong": false,
+    "has_noi_dung": false,
+    "has_ghi_chu": false,
+    "sample_dieu_text": null,
+    "sample_noi_dung_text": null,
+    "html_tags_present": true,
+    "has_links": true,
+    "has_scripts": false,
+    "has_styles": false
+  },
+  "issues": [
+    "Dữ liệu chứa HTML tags - cần làm sạch trước khi sử dụng"
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "category": "Data Cleaning",
+      "action": "Loại bỏ HTML tags và trích xuất văn bản thuần túy",
+      "description": "Sử dụng BeautifulSoup hoặc regex để loại bỏ tất cả HTML tags, chỉ giữ lại nội dung văn bản"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Data Processing",
+      "action": "Chia nhỏ dữ liệu theo điều luật",
+      "description": "Chia dữ liệu thành 40662 chunks, mỗi chunk là một điều luật. Điều này giúp RAG system tìm kiếm chính xác hơn."
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Metadata Extraction",
+      "action": "Trích xuất metadata cho mỗi điều luật",
+      "description": "Trích xuất: số điều, tên điều, chương, loại văn bản (Luật/Nghị định/Thông tư), ngày ban hành, ngày hiệu lực"
+    },
+    {
+      "priority": "HIGH",
+      "category": "RAG Setup",
+      "action": "Tạo vector embeddings cho dữ liệu",
+      "description": "Sử dụng embedding model hỗ trợ tiếng Việt (như multilingual models) để tạo vector cho mỗi chunk"
+    },
+    {
+      "priority": "LOW",
+      "category": "Data Preprocessing",
+      "action": "Chuẩn hóa văn bản",
+      "description": "Loại bỏ khoảng trắng thừa, chuẩn hóa dấu câu, xử lý các ký tự đặc biệt"
+    }
+  ]
+}
