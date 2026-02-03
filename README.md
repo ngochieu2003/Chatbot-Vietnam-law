@@ -108,11 +108,6 @@ chatbot_rag/
 └── Note/                   # Documentation
 ```
 
-## ⚠️ Lưu Ý
-
-- Các file lớn (>100MB) như `embeddings.npy`, `faiss_index.bin`, `chunks.json` không được commit vào Git
-- Cần tạo các file này bằng cách chạy các scripts trong từng module
-- Dataset gốc không được bao gồm trong repository
 
 ## 📚 Tài Liệu
 
